@@ -57,7 +57,7 @@ def _read_report(path: str) -> str:
         return f.read()
 
 
-def run(report_path: str) -> str:
+def run(report_path: str, out_path: str = "summary.md") -> None:
     _banner("MEDREPORT-SUMMARIZER PIPELINE")
 
     report_text = _read_report(report_path)
@@ -83,8 +83,11 @@ def run(report_path: str) -> str:
     summary = communicate(analysis)
     _step_done(3, "Communicator", "done")
 
-    _banner("SUMMARY", C_GREEN)
-    return summary
+    with open(out_path, "w", encoding="utf-8") as f:
+        f.write(summary)
+
+    _banner("SUMMARY SAVED", C_GREEN)
+    print(f"  {C_GREEN}->{C_RESET} {out_path}")
 
 
 def _print_parse_error(err: AgentParseError) -> None:
@@ -103,7 +106,7 @@ def _print_parse_error(err: AgentParseError) -> None:
 if __name__ == "__main__":
     path = sys.argv[1] if len(sys.argv) > 1 else "sample_report.txt"
     try:
-        print(run(path))
+        run(path)
     except AgentParseError as e:
         _print_parse_error(e)
         sys.exit(1)

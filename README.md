@@ -19,6 +19,12 @@ raw report text
 
 Each agent is a separate API call using `gemini-2.5-flash` (free tier).
 
+## Agents
+
+- **Extractor** — reads the raw report and pulls every test into structured JSON (name, value, unit, reference range, low/normal/high status). No interpretation.
+- **Interpreter** — groups tests into clinical panels, assigns severity to abnormals, spots cross-test patterns (e.g. HbA1c + FBS = diabetic range), and sets a triage level (monitor/routine/urgent) per finding plus overall. Conservative when uncertain.
+- **Communicator** — turns the analysis into a plain-language Markdown summary: quick summary, what needs attention, what looks fine, recommended next step, disclaimer. Warm tone, no diagnosing, no false reassurance.
+
 ## Setup
 
 ```bash
@@ -37,7 +43,7 @@ python main.py sample_report.txt    # plain-text report
 python main.py my_report.pdf        # text-based PDF (not scanned)
 ```
 
-For scanned-image PDFs, run OCR first and feed the resulting text file.
+The agents print their progress to the terminal and the final plain-language summary is written to `summary.md`. For scanned-image PDFs, run OCR first and feed the resulting text file.
 
 ## Disclaimer
 
