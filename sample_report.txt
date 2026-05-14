@@ -1,0 +1,89 @@
+Dr. Lal PathLabs
+National Reference Laboratory, New Delhi
+
+Patient Name : Mr. Rohan Sharma                Age / Sex     : 38 Y / Male
+Patient ID   : LPL-2026-1834521                Sample Type   : Venous Blood
+Referred By  : Dr. Anjali Iyer                 Collected On  : 12-May-2026 07:42
+Report ID    : 8472193                         Reported On   : 13-May-2026 18:10
+
+==================================================================================
+COMPLETE BLOOD COUNT (CBC) / HEMOGRAM
+----------------------------------------------------------------------------------
+Test                            Result        Unit            Bio. Ref. Interval
+Hemoglobin                      11.8   L      g/dL            13.0 - 17.0
+RBC Count                       4.62          million/uL      4.50 - 5.50
+Hematocrit (PCV)                36.2   L      %               40.0 - 50.0
+MCV                             78.4   L      fL              83.0 - 101.0
+MCH                             25.5   L      pg              27.0 - 32.0
+MCHC                            32.6          g/dL            31.5 - 34.5
+RDW-CV                          15.9   H      %               11.5 - 14.5
+Total WBC Count                 7.42          thousand/uL     4.00 - 10.00
+Neutrophils                     58            %               40 - 80
+Lymphocytes                     33            %               20 - 40
+Monocytes                       6             %               2 - 10
+Eosinophils                     3             %               1 - 6
+Basophils                       0             %               0 - 2
+Platelet Count                  268           thousand/uL     150 - 410
+
+==================================================================================
+GLYCEMIC PROFILE
+----------------------------------------------------------------------------------
+Fasting Blood Sugar             148    H      mg/dL           70 - 100
+HbA1c (Glycated Hemoglobin)     7.8    H      %               4.0 - 5.6
+
+Interpretation note (printed on lab report):
+  HbA1c < 5.7      : Non-diabetic
+  HbA1c 5.7 - 6.4  : Pre-diabetic
+  HbA1c >= 6.5     : Diabetic
+
+==================================================================================
+LIPID PROFILE
+----------------------------------------------------------------------------------
+Total Cholesterol               242    H      mg/dL           < 200
+Triglycerides                   218    H      mg/dL           < 150
+HDL Cholesterol                 34     L      mg/dL           > 40
+LDL Cholesterol (calc.)         164    H      mg/dL           < 100
+VLDL Cholesterol                43.6   H      mg/dL           < 30
+Total Cholesterol / HDL Ratio   7.1    H      Ratio           < 4.5
+
+==================================================================================
+LIVER FUNCTION TEST (LFT)
+----------------------------------------------------------------------------------
+Total Bilirubin                 0.9           mg/dL           0.2 - 1.2
+Direct Bilirubin                0.21          mg/dL           0.0 - 0.4
+Indirect Bilirubin              0.69          mg/dL           0.2 - 1.0
+SGOT (AST)                      38            U/L             5 - 40
+SGPT (ALT)                      78     H      U/L             7 - 56
+Alkaline Phosphatase            108           U/L             40 - 129
+Total Protein                   7.2           g/dL            6.4 - 8.3
+Albumin                         4.3           g/dL            3.5 - 5.2
+Globulin                        2.9           g/dL            2.3 - 3.5
+A/G Ratio                       1.48          Ratio           1.0 - 2.1
+
+==================================================================================
+KIDNEY FUNCTION TEST (KFT)
+----------------------------------------------------------------------------------
+Urea                            28            mg/dL           17 - 43
+Blood Urea Nitrogen (BUN)       13.1          mg/dL           7.9 - 20.1
+Creatinine                      0.95          mg/dL           0.66 - 1.25
+eGFR (CKD-EPI)                  102           mL/min/1.73m2   > 90
+Uric Acid                       6.4           mg/dL           3.5 - 7.2
+Sodium                          139           mEq/L           136 - 145
+Potassium                       4.3           mEq/L           3.5 - 5.1
+Chloride                        102           mEq/L           98 - 107
+
+==================================================================================
+THYROID PROFILE
+----------------------------------------------------------------------------------
+Total T3                        1.12          ng/mL           0.80 - 2.00
+Total T4                        8.4           ug/dL           5.1 - 14.1
+TSH (Ultrasensitive)            6.82   H      uIU/mL          0.27 - 4.20
+
+==================================================================================
+VITAMINS
+----------------------------------------------------------------------------------
+Vitamin D (25-Hydroxy)          14.6   L      ng/mL           30 - 100
+Vitamin B12                     198    L      pg/mL           211 - 911
+
+==================================================================================
+                                    --- END OF REPORT ---

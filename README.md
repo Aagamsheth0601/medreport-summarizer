@@ -17,7 +17,7 @@ raw report text
 [Communicator] → Markdown summary for the reader
 ```
 
-Each agent is a separate Anthropic API call using `claude-opus-4-7`.
+Each agent is a separate API call using `gemini-2.5-flash` (free tier).
 
 ## Setup
 
@@ -25,8 +25,10 @@ Each agent is a separate Anthropic API call using `claude-opus-4-7`.
 python -m venv .venv
 .venv\Scripts\activate          # Windows
 pip install -r requirements.txt
-copy .env.example .env          # then put your key in .env
+copy .env.example .env          # then put your Gemini API key in .env
 ```
+
+Get a free API key from https://aistudio.google.com/ (no card required).
 
 ## Run
 
