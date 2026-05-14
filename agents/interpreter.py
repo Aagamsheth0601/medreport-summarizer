@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 
+from agents import AgentParseError
 from agents.extractor import extract
 
 load_dotenv()
@@ -85,7 +86,10 @@ def interpret(extraction: dict) -> dict:
             temperature=0,
         ),
     )
-    return json.loads(response.text)
+    try:
+        return json.loads(response.text)
+    except json.JSONDecodeError as e:
+        raise AgentParseError("Interpreter", response.text or "", e) from e
 
 
 if __name__ == "__main__":

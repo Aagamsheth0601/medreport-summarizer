@@ -33,8 +33,11 @@ Get a free API key from https://aistudio.google.com/ (no card required).
 ## Run
 
 ```bash
-python main.py sample_report.txt
+python main.py sample_report.txt    # plain-text report
+python main.py my_report.pdf        # text-based PDF (not scanned)
 ```
+
+For scanned-image PDFs, run OCR first and feed the resulting text file.
 
 ## Disclaimer
 

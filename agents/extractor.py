@@ -8,6 +8,8 @@ from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 
+from agents import AgentParseError
+
 load_dotenv()
 
 MODEL = "gemini-2.5-flash"
@@ -58,7 +60,10 @@ def extract(report_text: str) -> dict:
             temperature=0,
         ),
     )
-    return json.loads(response.text)
+    try:
+        return json.loads(response.text)
+    except json.JSONDecodeError as e:
+        raise AgentParseError("Extractor", response.text or "", e) from e
 
 
 if __name__ == "__main__":
