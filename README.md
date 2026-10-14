@@ -8,11 +8,11 @@
 
 ## What this project demonstrates
 
-The interesting part is the handoff between agents: each stage has a different responsibility, a structured output contract, and checks before the next stage starts. All three stages make real Gemini calls. The React interface shows the original report, actual stage progress, extracted lab values, and each agent's input and output.
+The interesting part is the handoff between agents: each stage has a different responsibility, a structured output contract, and checks before the next stage starts. The Python pipeline makes three real Gemini calls. The public React demo displays saved outputs from those calls, including the original report, extracted lab values, and each agent's input and output. It does not run live inference.
 
 This is a **sequential multi-agent LLM pipeline**, not an autonomous agent system. It does not independently plan tasks, select tools, or establish medical accuracy.
 
-**Current status:** milestone two adds a local React interface and FastAPI server. Hosting is the next milestone; there is no public website yet.
+**Live demo:** [MedReport Decoder](https://medreport-decoder.netlify.app/) — a static recorded demo hosted on Netlify. The Python pipeline and FastAPI API remain available for local live runs.
 
 ![MedReport web workspace](docs/screenshots/workspace.png)
 
@@ -30,9 +30,9 @@ Set-Location ..
 .\.venv\Scripts\python.exe -m uvicorn api:app --host 127.0.0.1 --port 8000
 ```
 
-Open http://127.0.0.1:8000. Choose a synthetic sample and select **Analyze this sample**.
+Open http://127.0.0.1:8000. Choose a synthetic sample and select **Explore this report**.
 Inspect Overview, Lab values, and Agent trace, then download Markdown or all-stage JSON.
-No uploads are accepted and the Gemini key stays on the Python server.
+No uploads are accepted. The React demo loads recorded outputs and needs no API key; live inference is available through the Python CLI or FastAPI endpoints.
 
 For development, run the API in one terminal and `npm run dev` from `frontend/` in another.
 Vite serves port 5173 and proxies `/api` to port 8000. No permissive CORS configuration is needed.
