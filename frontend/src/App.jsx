@@ -149,7 +149,6 @@ export default function App() {
             <h1>Less jargon.<br/><em>More clarity.</em></h1>
             <p>What happens between a blood report and an explanation you can actually understand? Meet the three AI agents doing the work.</p>
             <a className="hero-cta" href="#workspace">Explore a sample report <Icon name="arrow" /></a>
-            <div className="hero-byline">Built by <strong>Aagam Sheth</strong><span> / </span>Python + React + Gemini</div>
           </div>
           <div className="decoder-visual" aria-label="Three agents turn source values into a readable explanation">
             <div className="visual-label"><span>INSIDE THE SYSTEM</span><span>01 — 03</span></div>
@@ -414,7 +413,7 @@ export default function App() {
                             )
                           }
                         >
-                          Download all stages <Icon name="download" size={14} />
+                          Download agent outputs (JSON) <Icon name="download" size={14} />
                         </button>
                       </div>
                     )}
