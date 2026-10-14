@@ -5,7 +5,7 @@
 - Portfolio project demonstrating three sequential LLM agents, not a clinical tool.
 - Only built-in synthetic reports are accepted. Do not add arbitrary uploads or real patient data.
 - Explain changes and failures to Aagam. Work in small verified milestones and checkpoint between them.
-- Milestone one is the Python pipeline. Web UI and deployment are later milestones.
+- Milestone one is the Python pipeline; milestone two adds the local React/FastAPI app. Hosting is milestone three.
 - Keep the Extractor, Interpreter, and Communicator as separate model calls with explicit contracts.
 - Keep secrets in ignored `.env`; run `git check-ignore .env` before committing.
 - Commit milestones with a `Co-Authored-By: Codex <noreply@openai.com>` trailer.
@@ -19,7 +19,10 @@
 - Offline tests replace the network boundary, not the pipeline. They do not establish clinical accuracy.
 - Live smoke tests require a valid Gemini key and may consume quota. Use only the three built-in samples.
 - Preserve local validation even when the provider supports only part of a JSON Schema.
-- No UI exists yet. When added, verify ~390px, ~768px, and ~1280px viewports with Playwright.
+- Verify UI changes at ~390px, ~768px, and ~1280px with Playwright. Use Vite 5 for Node 20.11.1.
+- Web preview: build `frontend/` with `npm ci` and `npm run build`, then run `python -m uvicorn api:app --host 127.0.0.1 --port 8000`.
+- Run one Uvicorn worker. Jobs live in bounded process memory; do not deploy multiple workers without changing storage.
+- API tests require local socket access on Windows, even with fake model responses, because asyncio creates an internal socket.
 
 ## Architecture
 
@@ -32,6 +35,17 @@
 - `samples/`: synthetic source reports and separately inspectable expected extraction files.
 
 ## Bug log / gotchas
+
+### Web test client compatibility and Windows sandbox
+- Symptom: API tests first failed on a deprecation warning, then hung before executing requests.
+- Root cause: installed Starlette expects httpx2 for tests; the sandbox blocked asyncio's internal socketpair.
+- Fix: pin httpx2 in development dependencies and run API tests with local socket access. Seven API tests passed.
+
+### Responsive polish and visible failure handling
+- Symptom: a heading joined words when its line break was hidden; the skip link appeared in scrolled full-page captures.
+- Root cause: missing explicit whitespace and an offscreen-only hiding technique.
+- Fix: preserve whitespace and clip the skip link until keyboard focus. Add a narrow-screen table-scroll hint.
+- Network failures preserve the job ID for reconnect; expired runs and busy-server responses show explicit errors.
 
 ### Model JSON can parse but still be invalid
 - Symptom: missing fields, wrong types, or duplicate tests could reach the next stage.
@@ -79,3 +93,8 @@
 - No automatic retries; failed stages surface errors and stop. Each request has a 60-second timeout.
 - The expected fixtures are never sent as replacement model answers. They check only the Extractor result locally.
 - No frontend, authentication, public endpoint, or deployment in milestone one.
+
+### Netlify portfolio mode and layout migration
+- Public React demo reads `frontend/public/demo.json`: validated saved real runs, no secrets or live calls. Do not describe playback as live inference.
+- Symptom: desktop analysis left empty space after moving samples to a horizontal row. Cause: inherited workspace max-width. Fix: expand analysis to full width and recheck three viewports.
+- Windows sandbox preview required elevated local socket access.

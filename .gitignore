@@ -3,6 +3,7 @@
 !.env.example
 summary.md
 outputs/
+node_modules/
 
 __pycache__/
 *.py[cod]

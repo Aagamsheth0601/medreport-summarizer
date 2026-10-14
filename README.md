@@ -1,3 +1,5 @@
+> **Public web demo:** the React interface displays recorded outputs from three real Gemini runs on synthetic reports. It makes no live AI calls. The Python pipeline and FastAPI adapter remain available separately. Netlify builds `frontend/` with the root `netlify.toml` configuration.
+
 # MedReport Summarizer
 
 **A three-agent LLM pipeline that turns synthetic blood-report data into an inspectable, plain-language explanation.**
@@ -6,11 +8,53 @@
 
 ## What this project demonstrates
 
-The interesting part is the handoff between agents: each stage has a different responsibility, a structured output contract, and checks before the next stage starts. All three stages make real Gemini calls. The application preserves each result so a future interface can show how the final explanation was produced.
+The interesting part is the handoff between agents: each stage has a different responsibility, a structured output contract, and checks before the next stage starts. All three stages make real Gemini calls. The React interface shows the original report, actual stage progress, extracted lab values, and each agent's input and output.
 
 This is a **sequential multi-agent LLM pipeline**, not an autonomous agent system. It does not independently plan tasks, select tools, or establish medical accuracy.
 
-**Current status:** milestone one implements the Python pipeline and CLI. A React web interface and hosting are planned for later milestones; there is no live website yet.
+**Current status:** milestone two adds a local React interface and FastAPI server. Hosting is the next milestone; there is no public website yet.
+
+![MedReport web workspace](docs/screenshots/workspace.png)
+
+[Mobile screenshot](docs/screenshots/mobile.png)
+
+## Start the web app
+
+After the Python setup below, use Node 20.11.1 and the pinned Vite 5 toolchain:
+
+```powershell
+Set-Location frontend
+npm ci
+npm run build
+Set-Location ..
+.\.venv\Scripts\python.exe -m uvicorn api:app --host 127.0.0.1 --port 8000
+```
+
+Open http://127.0.0.1:8000. Choose a synthetic sample and select **Analyze this sample**.
+Inspect Overview, Lab values, and Agent trace, then download Markdown or all-stage JSON.
+No uploads are accepted and the Gemini key stays on the Python server.
+
+For development, run the API in one terminal and `npm run dev` from `frontend/` in another.
+Vite serves port 5173 and proxies `/api` to port 8000. No permissive CORS configuration is needed.
+
+### Web API and run lifecycle
+
+| Endpoint | Purpose |
+| --- | --- |
+| `GET /api/health` | Check server availability |
+| `GET /api/samples` | List the three synthetic sources |
+| `POST /api/runs` | Start a run with only `sample_id`; returns HTTP 202 and an ID |
+| `GET /api/runs/{id}` | Read actual stage progress, errors, or the completed result |
+
+The browser polls every 800 ms after the previous response finishes. If the connection breaks,
+**Reconnect to this run** resumes checking the same job instead of starting new model calls.
+Changing samples clears the old result. Generated text is rendered as text, never raw HTML.
+
+Use **one Uvicorn worker**. This local milestone keeps at most 20 runs in memory; completed
+runs expire after 30 minutes, and restarting the server clears them. Only one analysis runs
+at a time; extra requests receive HTTP 409. Refreshing the page clears browser state, but does
+not cancel an already-running server job. Public hosting, rate limits, and durable job handling
+will be considered in the next milestone.
 
 ## How it works
 
@@ -129,6 +173,8 @@ See [VERIFICATION.md](VERIFICATION.md) for the milestone's actual test results a
 
 ```text
 agents/             Three specialized agent functions and stage errors
+api.py              FastAPI endpoints and bounded in-memory run management
+frontend/           React interface, Vite configuration, and locked dependencies
 samples/            Synthetic reports and expected extraction fixtures
 tests/              Offline contract, pipeline, provider, and CLI tests
 schemas.py          Typed data contracts and fixed disclaimer
@@ -139,4 +185,4 @@ main.py             CLI and output saving
 AGENTS.md           Development guidance and bug log
 ```
 
-The web interface, hosting, and a single-prompt comparison are future work. Milestone one is intentionally limited to a testable Python foundation.
+Hosting and a single-prompt comparison are future work. See [WEB_VERIFICATION.md](WEB_VERIFICATION.md) for milestone-two checks.
