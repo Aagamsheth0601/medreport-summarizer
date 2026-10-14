@@ -1,0 +1,57 @@
+{
+  "tests": [
+    {
+      "test_name": "Hemoglobin",
+      "value": 14.5,
+      "unit": "g/dL",
+      "reference_text": "13.0 - 17.0",
+      "reference_range": {
+        "low": 13,
+        "high": 17,
+        "low_inclusive": true,
+        "high_inclusive": true
+      },
+      "status": "normal"
+    },
+    {
+      "test_name": "Fasting Blood Sugar",
+      "value": 88,
+      "unit": "mg/dL",
+      "reference_text": "70 - 100",
+      "reference_range": {
+        "low": 70,
+        "high": 100,
+        "low_inclusive": true,
+        "high_inclusive": true
+      },
+      "status": "normal"
+    },
+    {
+      "test_name": "Total Cholesterol",
+      "value": 175,
+      "unit": "mg/dL",
+      "reference_text": "< 200",
+      "reference_range": {
+        "low": null,
+        "high": 200,
+        "low_inclusive": true,
+        "high_inclusive": false
+      },
+      "status": "normal"
+    },
+    {
+      "test_name": "HDL Cholesterol",
+      "value": 55,
+      "unit": "mg/dL",
+      "reference_text": "> 40",
+      "reference_range": {
+        "low": 40,
+        "high": null,
+        "low_inclusive": false,
+        "high_inclusive": true
+      },
+      "status": "normal"
+    }
+  ],
+  "warnings": []
+}

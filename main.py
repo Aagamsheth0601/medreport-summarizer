@@ -1,112 +1,73 @@
-"""End-to-end pipeline: raw blood report text -> plain-language Markdown summary.
+"""CLI adapter for the synthetic-only portfolio pipeline."""
 
-Run: python main.py [report_path]
-"""
-
+import argparse
+import os
+from pathlib import Path
 import sys
-
-from colorama import Fore, Style, init as colorama_init
-
-from agents import AgentParseError
-from agents.communicator import communicate
-from agents.extractor import extract
-from agents.interpreter import interpret
-
-colorama_init()
-
-C_CYAN = Fore.CYAN
-C_GREEN = Fore.GREEN
-C_YELLOW = Fore.YELLOW
-C_RED = Fore.RED
-C_DIM = Style.DIM
-C_BOLD = Style.BRIGHT
-C_RESET = Style.RESET_ALL
+import tempfile
+from uuid import uuid4
+from dotenv import load_dotenv
+from agents import PipelineError
+from llm import GeminiClient
+from pipeline import run_pipeline
+from samples import SAMPLE_IDS
 
 
-def _banner(title: str, color: str = C_CYAN) -> None:
-    line = "=" * 70
-    print(f"{color}{C_BOLD}{line}{C_RESET}")
-    print(f"{color}{C_BOLD}{title.center(70)}{C_RESET}")
-    print(f"{color}{C_BOLD}{line}{C_RESET}")
-    print()
+def publish_output(temporary: Path, output: Path):
+    # Windows rename fails if the destination exists; POSIX rename would overwrite.
+    if os.name == "nt":
+        os.rename(temporary, output)
+    else:
+        os.link(temporary, output)
 
 
-def _step_start(n: int, agent: str, msg: str) -> None:
-    print(f"{C_YELLOW}>> [{n}/3] {agent:<14}{C_RESET} {C_DIM}{msg}{C_RESET}")
+def save_result(result, output: Path):
+    """Publish a complete file atomically without overwriting an existing result."""
+    output.parent.mkdir(parents=True, exist_ok=True)
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=output.parent,
+                                         prefix=".medreport-", delete=False) as handle:
+            temporary = Path(handle.name)
+            handle.write(result.model_dump_json(indent=2))
+        publish_output(temporary, output)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
 
 
-def _step_done(n: int, agent: str, msg: str) -> None:
-    print(f"{C_GREEN}[OK] [{n}/3] {agent:<14}{C_RESET} {msg}")
-    print()
+def main(argv=None) -> int:
+    parser = argparse.ArgumentParser(description="Three-agent synthetic-report portfolio demo")
+    parser.add_argument("--sample", choices=SAMPLE_IDS, default="within-range")
+    parser.add_argument("--list", action="store_true", help="List built-in synthetic reports without an API call")
+    parser.add_argument("--output", type=Path, help="New JSON output file; existing files are never overwritten")
+    args = parser.parse_args(argv)
+    if args.list:
+        print("\n".join(SAMPLE_IDS))
+        return 0
 
-
-def _read_report(path: str) -> str:
-    """Read a blood report from a .txt or .pdf file and return its text."""
-    if path.lower().endswith(".pdf"):
-        from pypdf import PdfReader
-
-        reader = PdfReader(path)
-        text = "\n\n".join((page.extract_text() or "") for page in reader.pages).strip()
-        if not text:
-            raise RuntimeError(
-                f"No text could be extracted from {path}. "
-                "If this is a scanned PDF, it needs OCR before this pipeline can read it."
-            )
-        return text
-    with open(path, "r", encoding="utf-8") as f:
-        return f.read()
-
-
-def run(report_path: str, out_path: str = "summary.md") -> None:
-    _banner("MEDREPORT-SUMMARIZER PIPELINE")
-
-    report_text = _read_report(report_path)
-
-    _step_start(1, "Extractor", "parsing raw report into structured tests...")
-    extraction = extract(report_text)
-    n_tests = len(extraction.get("tests", []))
-    _step_done(1, "Extractor", f"{n_tests} tests extracted")
-
-    _step_start(2, "Interpreter", "grouping panels, assigning severity and triage...")
-    analysis = interpret(extraction)
-    n_panels = len(analysis.get("panels", []))
-    n_findings = len(analysis.get("findings", []))
-    overall = analysis.get("overall_triage", "unknown").upper()
-    triage_color = {"URGENT": C_RED, "ROUTINE": C_YELLOW, "MONITOR": C_GREEN}.get(overall, C_DIM)
-    _step_done(
-        2,
-        "Interpreter",
-        f"{n_panels} panels, {n_findings} findings -- overall triage: {triage_color}{C_BOLD}{overall}{C_RESET}",
-    )
-
-    _step_start(3, "Communicator", "writing plain-language summary...")
-    summary = communicate(analysis)
-    _step_done(3, "Communicator", "done")
-
-    with open(out_path, "w", encoding="utf-8") as f:
-        f.write(summary)
-
-    _banner("SUMMARY SAVED", C_GREEN)
-    print(f"  {C_GREEN}->{C_RESET} {out_path}")
-
-
-def _print_parse_error(err: AgentParseError) -> None:
-    print()
-    print(f"{C_RED}{C_BOLD}!! {err.agent} produced invalid JSON{C_RESET}")
-    print(f"{C_RED}-- parse error: {err.original}{C_RESET}")
-    print()
-    print(f"{C_DIM}--- raw output (first 800 chars) ---{C_RESET}")
-    snippet = err.raw_output[:800]
-    if len(err.raw_output) > 800:
-        snippet += f"\n... [truncated, full length {len(err.raw_output)} chars]"
-    print(snippet)
-    print(f"{C_DIM}--- end raw output ---{C_RESET}")
+    load_dotenv(Path(__file__).resolve().parent / ".env")
+    client = None
+    try:
+        output = args.output or Path("outputs") / f"{args.sample}-{uuid4().hex}.json"
+        if output.exists():
+            raise PipelineError("Output", "Output file already exists; choose a new filename.")
+        client = GeminiClient()
+        print("PORTFOLIO DEMO: synthetic reports only; AI can make mistakes.", flush=True)
+        result = run_pipeline(args.sample, client, lambda stage, state: print(f"{stage}: {state}", flush=True))
+        save_result(result, output)
+        print(f"Saved {len(result.extraction.tests)} tests and all three agent outputs to {output}")
+        return 0
+    except PipelineError as exc:
+        print(f"Pipeline stopped. {exc}", file=sys.stderr)
+        return 1
+    except OSError:
+        print("Pipeline stopped. Output could not be saved; check the path, permissions, and disk space.", file=sys.stderr)
+        return 1
+    finally:
+        if client:
+            client.close()
 
 
 if __name__ == "__main__":
-    path = sys.argv[1] if len(sys.argv) > 1 else "sample_report.txt"
-    try:
-        run(path)
-    except AgentParseError as e:
-        _print_parse_error(e)
-        sys.exit(1)
+    sys.exit(main())

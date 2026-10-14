@@ -1,8 +1,9 @@
-class AgentParseError(Exception):
-    """Raised when an agent's JSON output cannot be parsed."""
+"""Three specialized LLM stages for a synthetic-report portfolio demo."""
 
-    def __init__(self, agent: str, raw_output: str, original: Exception):
-        self.agent = agent
-        self.raw_output = raw_output
-        self.original = original
-        super().__init__(f"{agent} returned invalid JSON: {original}")
+
+class PipelineError(Exception):
+    """An actionable, safe-to-display error without provider payloads."""
+
+    def __init__(self, stage: str, message: str):
+        self.stage = stage
+        super().__init__(f"{stage}: {message}")

@@ -1,0 +1,65 @@
+{
+  "tests": [
+    {
+      "test_name": "Total Cholesterol",
+      "value": 200,
+      "unit": "mg/dL",
+      "reference_text": "< 200",
+      "reference_range": {
+        "low": null,
+        "high": 200,
+        "low_inclusive": true,
+        "high_inclusive": false
+      },
+      "status": "high"
+    },
+    {
+      "test_name": "HDL Cholesterol",
+      "value": 40,
+      "unit": "mg/dL",
+      "reference_text": "> 40",
+      "reference_range": {
+        "low": 40,
+        "high": null,
+        "low_inclusive": false,
+        "high_inclusive": true
+      },
+      "status": "low"
+    },
+    {
+      "test_name": "Fasting Blood Sugar",
+      "value": 100,
+      "unit": "mg/dL",
+      "reference_text": "70 - 100",
+      "reference_range": {
+        "low": 70,
+        "high": 100,
+        "low_inclusive": true,
+        "high_inclusive": true
+      },
+      "status": "normal"
+    },
+    {
+      "test_name": "eGFR",
+      "value": 90,
+      "unit": "mL/min/1.73m2",
+      "reference_text": ">= 90",
+      "reference_range": {
+        "low": 90,
+        "high": null,
+        "low_inclusive": true,
+        "high_inclusive": true
+      },
+      "status": "normal"
+    },
+    {
+      "test_name": "Vitamin B12",
+      "value": 250,
+      "unit": "pg/mL",
+      "reference_text": "not supplied",
+      "reference_range": null,
+      "status": "unknown"
+    }
+  ],
+  "warnings": []
+}

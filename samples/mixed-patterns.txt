@@ -1,0 +1,10 @@
+SYNTHETIC PORTFOLIO SAMPLE - NOT A REAL PATIENT REPORT
+Values and ranges are fictional educational examples, not clinical guidance.
+Test | Result | Unit | Reference range
+Hemoglobin | 11.8 | g/dL | 13.0 - 17.0
+MCV | 78.4 | fL | 83.0 - 101.0
+Fasting Blood Sugar | 148 | mg/dL | 70 - 100
+HbA1c | 7.8 | % | 4.0 - 5.6
+LDL Cholesterol | 164 | mg/dL | < 100
+HDL Cholesterol | 34 | mg/dL | > 40
+Creatinine | 0.95 | mg/dL | 0.66 - 1.25

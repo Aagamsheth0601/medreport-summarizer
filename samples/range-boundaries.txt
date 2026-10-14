@@ -1,0 +1,8 @@
+SYNTHETIC PORTFOLIO SAMPLE - NOT A REAL PATIENT REPORT
+Values and ranges are fictional educational examples, not clinical guidance.
+Test | Result | Unit | Reference range
+Total Cholesterol | 200 | mg/dL | < 200
+HDL Cholesterol | 40 | mg/dL | > 40
+Fasting Blood Sugar | 100 | mg/dL | 70 - 100
+eGFR | 90 | mL/min/1.73m2 | >= 90
+Vitamin B12 | 250 | pg/mL | not supplied

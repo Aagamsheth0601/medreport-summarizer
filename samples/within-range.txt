@@ -1,0 +1,7 @@
+SYNTHETIC PORTFOLIO SAMPLE - NOT A REAL PATIENT REPORT
+Values and ranges are fictional educational examples, not clinical guidance.
+Test | Result | Unit | Reference range
+Hemoglobin | 14.5 | g/dL | 13.0 - 17.0
+Fasting Blood Sugar | 88 | mg/dL | 70 - 100
+Total Cholesterol | 175 | mg/dL | < 200
+HDL Cholesterol | 55 | mg/dL | > 40
