@@ -20,7 +20,7 @@ This is a **sequential multi-agent LLM pipeline**, not an autonomous agent syste
 
 ## Start the web app
 
-After the Python setup below, use Node 20.11.1 and the pinned Vite 5 toolchain:
+After the Python setup below, use Node 20.11.1 and the pinned Vite 6.4.4 toolchain:
 
 ```powershell
 Set-Location frontend
@@ -46,7 +46,7 @@ Vite serves port 5173 and proxies `/api` to port 8000. No permissive CORS config
 | `POST /api/runs` | Start a run with only `sample_id`; returns HTTP 202 and an ID |
 | `GET /api/runs/{id}` | Read actual stage progress, errors, or the completed result |
 
-The browser polls every 800 ms after the previous response finishes. If the connection breaks,
+The optional live API workflow polls every 800 ms after the previous response finishes; the deployed recorded demo does not use these endpoints. If the connection breaks,
 **Reconnect to this run** resumes checking the same job instead of starting new model calls.
 Changing samples clears the old result. Generated text is rendered as text, never raw HTML.
 
@@ -185,4 +185,4 @@ main.py             CLI and output saving
 AGENTS.md           Development guidance and bug log
 ```
 
-Hosting and a single-prompt comparison are future work. See [WEB_VERIFICATION.md](WEB_VERIFICATION.md) for milestone-two checks.
+The static recorded demo is hosted on Netlify; public hosting of the live inference API and a single-prompt comparison remain future work. See [WEB_VERIFICATION.md](WEB_VERIFICATION.md) for milestone-two checks.

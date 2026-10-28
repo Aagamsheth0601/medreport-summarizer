@@ -98,3 +98,7 @@
 - Public React demo reads `frontend/public/demo.json`: validated saved real runs, no secrets or live calls. Do not describe playback as live inference.
 - Symptom: desktop analysis left empty space after moving samples to a horizontal row. Cause: inherited workspace max-width. Fix: expand analysis to full width and recheck three viewports.
 - Windows sandbox preview required elevated local socket access.
+
+## Security/deployment maintenance October 28 2026
+- Added basic response hardening: framing denied, objects disabled, base URI restricted; MIME sniffing and referrer policy set.
+- Bug: dependency audits identified vulnerable build tooling. Root cause: older Vite/esbuild or source-map-js lock entries. Fix: Vite 6.4.4 and patched lock dependencies; production build and npm audit pass on Node 20.11.1.
