@@ -102,3 +102,4 @@
 ## Security/deployment maintenance October 28 2026
 - Added basic response hardening: framing denied, objects disabled, base URI restricted; MIME sniffing and referrer policy set.
 - Bug: dependency audits identified vulnerable build tooling. Root cause: older Vite/esbuild or source-map-js lock entries. Fix: Vite 6.4.4 and patched lock dependencies; production build and npm audit pass on Node 20.11.1.
+`n- Follow-up: patched pytest to 9.2.0 for its advisory; all 65 offline tests pass.
