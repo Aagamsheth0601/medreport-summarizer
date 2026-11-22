@@ -12,49 +12,46 @@ The interesting part is the handoff between agents: each stage has a different r
 
 This is a **sequential multi-agent LLM pipeline**, not an autonomous agent system. It does not independently plan tasks, select tools, or establish medical accuracy.
 
-**Live demo:** [MedReport Decoder](https://medreport-decoder.netlify.app/) — a static recorded demo hosted on Netlify. The Python pipeline and FastAPI API remain available for local live runs.
+**Recorded web demo:** [MedReport Decoder](https://medreport-decoder.netlify.app/) — a static recorded demo hosted on Netlify. The Python pipeline and FastAPI API remain available for local live runs.
 
 ![MedReport web workspace](docs/screenshots/workspace.png)
 
 [Mobile screenshot](docs/screenshots/mobile.png)
 
-## Start the web app
+## Run the recorded web demo locally
 
-After the Python setup below, use Node 20.11.1 and the pinned Vite 6.4.4 toolchain:
+Use Node 20.11.1. From the repository root:
 
 ```powershell
 Set-Location frontend
 npm ci
-npm run build
-Set-Location ..
+npm run dev
+```
+
+Open http://127.0.0.1:5173 and select **Explore this report**. You can inspect Overview, Lab values, and Agent trace, then download Markdown or all-stage JSON.
+
+The React app reads saved runs from `frontend/public/demo.json`. This is the same playback mode as the Netlify site. It needs only Node and npm.
+
+## Run the live API locally
+
+Complete the [local Python and Gemini key setup](#run-locally-windows-powershell). From the repository root:
+
+```powershell
 .\.venv\Scripts\python.exe -m uvicorn api:app --host 127.0.0.1 --port 8000
 ```
 
-Open http://127.0.0.1:8000. Choose a synthetic sample and select **Explore this report**.
-Inspect Overview, Lab values, and Agent trace, then download Markdown or all-stage JSON.
-No uploads are accepted. The React demo loads recorded outputs and needs no API key; live inference is available through the Python CLI or FastAPI endpoints.
-
-For development, run the API in one terminal and `npm run dev` from `frontend/` in another.
-Vite serves port 5173 and proxies `/api` to port 8000. No permissive CORS configuration is needed.
-
-### Web API and run lifecycle
+Use a FastAPI client, such as the [interactive API docs](http://127.0.0.1:8000/docs) or PowerShell's `Invoke-RestMethod`, to start a fresh Gemini run. The Python CLI also starts fresh runs.
 
 | Endpoint | Purpose |
 | --- | --- |
 | `GET /api/health` | Check server availability |
 | `GET /api/samples` | List the three synthetic sources |
-| `POST /api/runs` | Start a run with only `sample_id`; returns HTTP 202 and an ID |
-| `GET /api/runs/{id}` | Read actual stage progress, errors, or the completed result |
+| `POST /api/runs` | Start a run with a JSON body such as `{"sample_id":"mixed-patterns"}`. Returns HTTP 202 and a run ID |
+| `GET /api/runs/{id}` | Check the same run ID for stage progress, a result, or an error |
 
-The optional live API workflow polls every 800 ms after the previous response finishes; the deployed recorded demo does not use these endpoints. If the connection breaks,
-**Reconnect to this run** resumes checking the same job instead of starting new model calls.
-Changing samples clears the old result. Generated text is rendered as text, never raw HTML.
+Use **one Uvicorn worker**. The server keeps at most 20 runs in memory. Finished runs expire after 30 minutes, and a restart clears all runs. One analysis runs at a time. Concurrent submissions receive HTTP 409.
 
-Use **one Uvicorn worker**. This local milestone keeps at most 20 runs in memory; completed
-runs expire after 30 minutes, and restarting the server clears them. Only one analysis runs
-at a time; extra requests receive HTTP 409. Refreshing the page clears browser state, but does
-not cancel an already-running server job. Public hosting, rate limits, and durable job handling
-will be considered in the next milestone.
+FastAPI also serves the recorded web demo at `http://127.0.0.1:8000/` when `frontend/dist` exists. To create that folder, run `npm run build` from `frontend/`.
 
 ## How it works
 

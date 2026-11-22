@@ -19,7 +19,7 @@
 - Offline tests replace the network boundary, not the pipeline. They do not establish clinical accuracy.
 - Live smoke tests require a valid Gemini key and may consume quota. Use only the three built-in samples.
 - Preserve local validation even when the provider supports only part of a JSON Schema.
-- Verify UI changes at ~390px, ~768px, and ~1280px with Playwright. Use Vite 5 for Node 20.11.1.
+- Verify UI changes at ~390px, ~768px, and ~1280px with Playwright. Check Vite's Node requirements against the Node version pinned in `netlify.toml`.
 - Web preview: build `frontend/` with `npm ci` and `npm run build`, then run `python -m uvicorn api:app --host 127.0.0.1 --port 8000`.
 - Run one Uvicorn worker. Jobs live in bounded process memory; do not deploy multiple workers without changing storage.
 - API tests require local socket access on Windows, even with fake model responses, because asyncio creates an internal socket.
@@ -102,6 +102,7 @@
 
 ### Netlify portfolio mode and layout migration
 - Public React demo reads `frontend/public/demo.json`: validated saved real runs, no secrets or live calls. Do not describe playback as live inference.
+- Symptom: the README described live polling and reconnect as a browser workflow. Root cause: those instructions predated the recorded data loader. Fix: document React playback separately from fresh CLI and FastAPI runs.
 - Symptom: desktop analysis left empty space after moving samples to a horizontal row. Cause: inherited workspace max-width. Fix: expand analysis to full width and recheck three viewports.
 - Windows sandbox preview required elevated local socket access.
 
@@ -109,3 +110,8 @@
 - Added basic response hardening: framing denied, objects disabled, base URI restricted; MIME sniffing and referrer policy set.
 - Bug: dependency audits identified vulnerable build tooling. Root cause: older Vite/esbuild or source-map-js lock entries. Fix: Vite 6.4.4 and patched lock dependencies; production build and npm audit pass on Node 20.11.1.
 `n- Follow-up: patched pytest to 9.2.0 for its advisory; all 65 offline tests pass.
+
+### Vite major upgrade exceeded the Netlify Node version
+- Symptom: the Vite 8.3.5 Dependabot branch failed its Netlify deploy preview.
+- Compatibility issue: Vite 8 requires Node 20.19+ or 22.12+, while Netlify pins Node 20.11.1. The installed React plugin supports Vite through version 7. Vite 8.3.5 is also affected by GHSA-p4f5-76q4-ffq7.
+- Fix: upgrade to the patched Vite 6.4.6 release and verify the production build on Node 20.11.1.
