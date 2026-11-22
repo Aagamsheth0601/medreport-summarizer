@@ -157,6 +157,20 @@ Offline tests use scripted model responses and require no API key. They test con
 
 See [VERIFICATION.md](VERIFICATION.md) for the milestone's actual test results and live-service limitations.
 
+## Benchmark one call against three agents
+
+With the local Gemini key configured, run the paired comparison from the repository root:
+
+```powershell
+.\.venv\Scripts\python.exe benchmark.py
+```
+
+The benchmark uses three fixed synthetic reports [with hand-written expected extractions](benchmark_cases.json). Each approach receives the same report text and uses the same model and validators. The single-call baseline combines the three existing prompt instructions in one response. A full benchmark uses up to twelve model calls. Use `--case cutoffs-and-missing-range` to repeat just that pair.
+
+The JSON in `outputs/` includes elapsed time, attempted calls, total provider-reported tokens, exact extraction verification, and the outputs or errors. The total is unavailable if a call returns without token usage. A failed attempt stays in the results and gives the command a nonzero exit code.
+
+For prose review, compare the saved explanations against the report and its supplied ranges. Count any omitted out-of-range result or missing-range limitation, value or range contradiction, and unsupported diagnosis or care recommendation. The schema checks verify structure and evidence links. This review checks what the text claims about these synthetic reports.
+
 ## Design decisions and limits
 
 - **Three focused calls:** intermediate results are inspectable, but extra calls add latency and cost. There is no measured claim that this outperforms a single prompt yet.

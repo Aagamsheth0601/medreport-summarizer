@@ -62,3 +62,20 @@ def test_structured_schema_and_close(client):
     assert "maxItems" in str(Extraction.model_json_schema())
     client.close()
     client.client.close.assert_called_once()
+
+
+def test_failed_request_clears_previous_token_usage(client):
+    client.client.models.generate_content.side_effect = [
+        SimpleNamespace(
+            candidates=[SimpleNamespace(finish_reason=types.FinishReason.STOP)],
+            text="{}",
+            usage_metadata=SimpleNamespace(total_token_count=123),
+        ),
+        errors.APIError(503, {"message": "Unavailable"}),
+    ]
+
+    client.generate("Extractor", "prompt", "sample", Extraction)
+    assert client.last_total_tokens == 123
+    with pytest.raises(PipelineError, match="503"):
+        client.generate("Extractor", "prompt", "sample", Extraction)
+    assert client.last_total_tokens is None

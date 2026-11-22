@@ -27,7 +27,11 @@ def communicate(extraction: Extraction, analysis: Analysis, client: ModelClient)
     response = generate_validated(
         client, "Communicator", SYSTEM_PROMPT, contents, CommunicatorResponse
     )
+    return verify_explanations(analysis, response)
 
+
+def verify_explanations(analysis: Analysis, response: CommunicatorResponse) -> Explanation:
+    expected_ids = range(1, len(analysis.findings) + 1)
     explanations = {entry.finding_id: entry.text for entry in response.findings_explained}
     if (
         explanations.keys() != set(expected_ids)

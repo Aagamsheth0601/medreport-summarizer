@@ -35,6 +35,7 @@ class GeminiClient:
         self.model = os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite").strip()
         if not self.model:
             raise PipelineError("Configuration", "GEMINI_MODEL must not be blank.")
+        self.last_total_tokens: int | None = None
         self.client = genai.Client(
             api_key=key,
             http_options=types.HttpOptions(
@@ -46,6 +47,7 @@ class GeminiClient:
         self.client.close()
 
     def generate(self, stage: str, prompt: str, contents: str, schema: type[BaseModel]) -> str:
+        self.last_total_tokens = None
         try:
             response = self.client.models.generate_content(
                 model=self.model, contents=contents,
@@ -68,6 +70,9 @@ class GeminiClient:
             raise PipelineError(stage, "Gemini request timed out. Try again later.") from exc
         except httpx.RequestError as exc:
             raise PipelineError(stage, "Cannot reach Gemini. Check your connection.") from exc
+        usage = getattr(response, "usage_metadata", None)
+        if usage is not None:
+            self.last_total_tokens = usage.total_token_count
         candidates = response.candidates or []
         if not candidates or candidates[0].finish_reason != types.FinishReason.STOP:
             raise PipelineError(stage, "Gemini response was blocked or incomplete; no result was saved.")

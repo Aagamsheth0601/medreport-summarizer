@@ -21,6 +21,11 @@ def interpret(extraction: Extraction, client: ModelClient) -> Analysis:
     analysis = generate_validated(
         client, "Interpreter", SYSTEM_PROMPT, extraction.model_dump_json(), Analysis
     )
+    verify_analysis(extraction, analysis)
+    return analysis
+
+
+def verify_analysis(extraction: Extraction, analysis: Analysis):
     expected = Counter(test.test_name for test in extraction.tests)
     actual = Counter(name for panel in analysis.panels for name in panel.tests)
     if actual != expected:
@@ -33,4 +38,3 @@ def interpret(extraction: Extraction, client: ModelClient) -> Analysis:
     cited = {name for finding in analysis.findings for name in finding.related_tests}
     if not abnormal.issubset(cited):
         raise PipelineError("Interpreter", "Findings omitted an out-of-range result.")
-    return analysis

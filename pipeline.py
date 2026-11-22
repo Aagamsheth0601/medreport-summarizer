@@ -6,12 +6,18 @@ from agents.extractor import extract
 from agents.interpreter import interpret
 from llm import ModelClient
 from samples import load_sample, verify_extraction
-from schemas import PipelineResult
+from schemas import Extraction, PipelineResult
 
 
 def run_pipeline(sample_id: str, client: ModelClient,
                  on_progress: Callable[[str, str], None] | None = None) -> PipelineResult:
     report, expected = load_sample(sample_id)
+    return run_report(sample_id, report, expected, client, on_progress)
+
+
+def run_report(sample_id: str, report: str, expected: Extraction, client: ModelClient,
+               on_progress: Callable[[str, str], None] | None = None) -> PipelineResult:
+    """Run the three stages on a repository-owned synthetic fixture."""
 
     def progress(stage: str, state: str):
         if on_progress:
