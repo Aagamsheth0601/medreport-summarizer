@@ -83,3 +83,27 @@ def test_failed_calls_keep_failure_and_leave_total_tokens_unknown(routine):
     assert attempt.total_tokens is None
     assert attempt.result is None
     assert attempt.error == "Interpreter: HTTP 503"
+
+
+def test_both_modes_ground_the_same_cutoff_finding():
+    case = next(case for case in load_cases() if case.sample_id == "cutoffs-and-missing-range")
+    extraction, analysis, explanation = routine_responses(case)
+    wrong = "Triglycerides are above 150 mg/dL."
+    analysis["panels"][0]["panel_summary"] = "See the supplied ranges."
+    analysis["findings"] = [{
+        "finding": wrong, "related_tests": ["Triglycerides"], "rationale": wrong,
+    }]
+    explanation["within_range"] = "Albumin and Glucose are within their supplied ranges."
+    explanation["findings_explained"] = [{"finding_id": 1, "text": wrong}]
+    single = MeteredFake([dict(extraction=extraction, analysis=analysis, explanation=explanation)])
+    three = MeteredFake([extraction, analysis, explanation])
+
+    single_attempt = run_attempt(case, "single-call", single)
+    three_attempt = run_attempt(case, "three-agent", three)
+
+    expected = "Triglycerides measured 150 mg/dL, exactly at the excluded cutoff (< 150)."
+    assert single_attempt.result is not None
+    assert single_attempt.result == three_attempt.result
+    assert single_attempt.result.analysis.findings[0].rationale == expected
+    assert single_attempt.result.explanation.findings_explained == [expected]
+    assert wrong not in single_attempt.result.summary_markdown

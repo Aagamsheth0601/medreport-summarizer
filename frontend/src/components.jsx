@@ -371,8 +371,8 @@ export function Trace({ result, sample }) {
         <span className="eyebrow">UNDER THE HOOD</span>
         <h3>Three agents. A visible handoff.</h3>
         <p>
-          Inspect the data sent to each agent and the output it returned. These
-          are structured results, not hidden model reasoning.
+          See how data moves between the agents and inspect the validated results
+          saved by the pipeline.
         </p>
       </div>
       {AGENTS.map((agent, i) => (

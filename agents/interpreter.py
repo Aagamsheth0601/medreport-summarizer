@@ -2,6 +2,7 @@
 
 from collections import Counter
 from agents import PipelineError
+from agents.range_evidence import cutoff_finding_evidence
 from llm import ModelClient, generate_validated
 from schemas import Analysis, Extraction
 
@@ -21,11 +22,10 @@ def interpret(extraction: Extraction, client: ModelClient) -> Analysis:
     analysis = generate_validated(
         client, "Interpreter", SYSTEM_PROMPT, extraction.model_dump_json(), Analysis
     )
-    verify_analysis(extraction, analysis)
-    return analysis
+    return validate_analysis(extraction, analysis)
 
 
-def verify_analysis(extraction: Extraction, analysis: Analysis):
+def validate_analysis(extraction: Extraction, analysis: Analysis) -> Analysis:
     expected = Counter(test.test_name for test in extraction.tests)
     actual = Counter(name for panel in analysis.panels for name in panel.tests)
     if actual != expected:
@@ -38,3 +38,15 @@ def verify_analysis(extraction: Extraction, analysis: Analysis):
     cited = {name for finding in analysis.findings for name in finding.related_tests}
     if not abnormal.issubset(cited):
         raise PipelineError("Interpreter", "Findings omitted an out-of-range result.")
+
+    evidence = cutoff_finding_evidence(extraction, analysis)
+    if not evidence:
+        return analysis
+    findings = analysis.findings.copy()
+    for finding_id, rationale in evidence.items():
+        index = finding_id - 1
+        findings[index] = findings[index].model_copy(update={
+            "finding": "At an excluded cutoff",
+            "rationale": rationale,
+        })
+    return analysis.model_copy(update={"findings": findings})

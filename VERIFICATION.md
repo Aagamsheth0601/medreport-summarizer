@@ -82,3 +82,11 @@ Both modes passed two of three first attempts, for different cases. Every comple
 Manual review of the five completed explanations, including the repeat, found one range wording issue. The three-agent cutoff run correctly classified 150 as outside the supplied range of `< 150`. Its explanation called the value above the cutoff even though it was equal to the cutoff and excluded by the strict inequality. Under the benchmark rubric, no out-of-range result or missing-range limitation was omitted from those completed outputs, and no diagnosis or treatment recommendation appeared.
 
 This is a small first comparison. The results identify a testable prose-grounding gap and give one matched token measurement. More completed pairs and repeated runs are needed to estimate overall quality or typical latency.
+
+## Strict cutoff regression
+
+An offline regression reproduced incorrect above/below wording for both strict cutoff directions. The fix also covers other tests cited by the same finding, including inclusive boundaries and missing ranges. All 76 offline tests passed.
+
+In a fresh 3.5 Flash-Lite run on `cutoffs-and-missing-range`, the three-agent trace and Markdown report both said: “Triglycerides measured 150 mg/dL, exactly at the excluded cutoff (< 150).” The single-call attempt again failed extraction validation at `extraction.tests.0`. The offline comparison exercised the shared wording fix through both modes with a valid extraction.
+
+The public “Right on the boundary” recording was refreshed from a new Gemini 3.5 Flash-Lite run. Both strict cutoff findings use the validated wording in the overview, trace, and Markdown. The production build on Node 20.11.1 included the refreshed recording.
