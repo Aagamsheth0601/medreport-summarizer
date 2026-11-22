@@ -65,7 +65,7 @@ flowchart TD
     C --> D[Interpreter: panels and evidence-linked patterns]
     D --> E[Validate test references and coverage]
     E --> F[Communicator: plain-language explanation]
-    F --> G[Validate structure and explanation count]
+    F --> G[Validate structure and match explanations to finding IDs]
     G --> H[Add fixed disclaimer and save all stages]
 ```
 
@@ -73,7 +73,7 @@ flowchart TD
 | --- | --- | --- | --- |
 | Extractor | Synthetic report text | Test names, numbers, units, ranges, statuses, warnings | Strict types; finite numbers; exact bounds; no duplicate tests; match the authored sample |
 | Interpreter | Validated extraction | Panels, findings, related test names, limitations | Every test belongs to exactly one panel; references must exist; every low/high result is cited |
-| Communicator | Extraction and analysis | Plain-language summary, explanations, limitations | Required fields and one explanation entry per finding; fixed notice added by code |
+| Communicator | Extraction and analysis with finding IDs | Plain-language summary, explanations, limitations | Exactly one explanation per finding ID; fixed notice added by code |
 
 The Interpreter describes the sample's evidence and relationships. It does not assign urgency, prescribe treatment, or recommend appointment timing. Those behaviors from the original CLI were removed for the portfolio scope.
 
@@ -150,6 +150,7 @@ git check-ignore .env
 In a restricted Windows sandbox, place disposable test files in the workspace:
 
 ```powershell
+New-Item -ItemType Directory -Force -Path outputs | Out-Null
 .\.venv\Scripts\python.exe -m pytest -q --basetemp=outputs\pytest-temp
 ```
 

@@ -15,7 +15,7 @@
 - Windows PowerShell, Python 3.10, project `.venv`.
 - Install `requirements-dev.txt`; run `python -m pytest -q` from the repository root.
 - In a restricted Windows sandbox, use `python -m pytest -q --basetemp=outputs/pytest-temp`.
-  This directory is disposable test data; pytest clears its contents.
+  Create the `outputs/` parent directory first. The `pytest-temp` directory is disposable test data; pytest clears its contents.
 - Offline tests replace the network boundary, not the pipeline. They do not establish clinical accuracy.
 - Live smoke tests require a valid Gemini key and may consume quota. Use only the three built-in samples.
 - Preserve local validation even when the provider supports only part of a JSON Schema.
@@ -77,11 +77,17 @@
 - Symptom: a helper was collected as a test, imports failed outside the repo, and two save tests failed in sandbox system-temp.
 - Root cause: helper name started with `test_`, no configured Python path, and restricted temp-directory file operations.
 - Fix: rename the helper, add `pytest.ini`, and use `--basetemp=outputs/pytest-temp` in the sandbox. All tests then passed.
+- On a fresh checkout, CLI tests failed at setup because the `outputs/` parent directory was missing. Create `outputs/` before using a temp directory inside it.
 
 ### Findings could omit out-of-range evidence
 - Symptom: a structurally valid analysis could group a test into a panel but omit it from findings.
 - Root cause: panel coverage alone did not verify finding coverage.
 - Fix: require every low/high test to be cited by at least one finding. This checks coverage, not prose correctness.
+
+### Explanations could repeat a finding and skip another
+- Symptom: two copies of one explanation passed validation for a report with two findings.
+- Root cause: the Communicator checked the number of explanations without checking their links to findings.
+- Fix: assign finding IDs at the Communicator handoff and require exactly one explanation for each ID. Save the validated text in finding order for compatibility with recorded reports.
 
 ## Remaining limits
 
@@ -89,7 +95,7 @@
   their recorded outputs passed the final validators. See `VERIFICATION.md`. Do not describe recorded replay as a new live run.
 
 - No clinical validation. Reference ranges are illustrative, not medical advice.
-- Prose correctness and one-to-one explanation semantics are not mechanically proven.
+- Finding IDs verify coverage. Whether each explanation accurately describes its finding still requires separate evaluation.
 - No automatic retries; failed stages surface errors and stop. Each request has a 60-second timeout.
 - The expected fixtures are never sent as replacement model answers. They check only the Extractor result locally.
 - No frontend, authentication, public endpoint, or deployment in milestone one.

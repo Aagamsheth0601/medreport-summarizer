@@ -93,6 +93,18 @@ class Explanation(Contract):
     limitations: Text
 
 
+class FindingExplanation(Contract):
+    finding_id: int
+    text: Text
+
+
+class CommunicatorResponse(Contract):
+    quick_summary: Text
+    findings_explained: list[FindingExplanation] = Field(max_length=100)
+    within_range: Text
+    limitations: Text
+
+
 DISCLAIMER = (
     "**PORTFOLIO DEMO — FOR INFORMATIONAL PURPOSES ONLY**\n\n"
     "This project uses synthetic reports and AI-generated explanations, which can make mistakes. "
