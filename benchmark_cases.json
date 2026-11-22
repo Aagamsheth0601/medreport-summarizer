@@ -1,0 +1,167 @@
+[
+  {
+    "sample_id": "routine-cbc",
+    "report": "SYNTHETIC EDUCATIONAL REPORT\nLab test | Result | Unit | Reference range\nWhite Blood Cell Count | 6.4 | x10^3/uL | 4.0 - 11.0\nRed Blood Cell Count | 4.8 | x10^6/uL | 4.2 - 5.4\nPlatelet Count | 245 | x10^3/uL | 150 - 450",
+    "expected": {
+      "tests": [
+        {
+          "test_name": "White Blood Cell Count",
+          "value": 6.4,
+          "unit": "x10^3/uL",
+          "reference_text": "4.0 - 11.0",
+          "reference_range": {
+            "low": 4,
+            "high": 11,
+            "low_inclusive": true,
+            "high_inclusive": true
+          },
+          "status": "normal"
+        },
+        {
+          "test_name": "Red Blood Cell Count",
+          "value": 4.8,
+          "unit": "x10^6/uL",
+          "reference_text": "4.2 - 5.4",
+          "reference_range": {
+            "low": 4.2,
+            "high": 5.4,
+            "low_inclusive": true,
+            "high_inclusive": true
+          },
+          "status": "normal"
+        },
+        {
+          "test_name": "Platelet Count",
+          "value": 245,
+          "unit": "x10^3/uL",
+          "reference_text": "150 - 450",
+          "reference_range": {
+            "low": 150,
+            "high": 450,
+            "low_inclusive": true,
+            "high_inclusive": true
+          },
+          "status": "normal"
+        }
+      ],
+      "warnings": []
+    }
+  },
+  {
+    "sample_id": "mixed-iron-panel",
+    "report": "SYNTHETIC EDUCATIONAL REPORT\nHemoglobin: 10.8 g/dL (reference: 12.0 - 15.5)\nMean Corpuscular Volume: 74 fL (reference: 80 - 100)\nFerritin: 11 ng/mL (reference: 15 - 150)\nWhite Blood Cell Count: 7.2 x10^3/uL (reference: 4.0 - 11.0)",
+    "expected": {
+      "tests": [
+        {
+          "test_name": "Hemoglobin",
+          "value": 10.8,
+          "unit": "g/dL",
+          "reference_text": "12.0 - 15.5",
+          "reference_range": {
+            "low": 12,
+            "high": 15.5,
+            "low_inclusive": true,
+            "high_inclusive": true
+          },
+          "status": "low"
+        },
+        {
+          "test_name": "Mean Corpuscular Volume",
+          "value": 74,
+          "unit": "fL",
+          "reference_text": "80 - 100",
+          "reference_range": {
+            "low": 80,
+            "high": 100,
+            "low_inclusive": true,
+            "high_inclusive": true
+          },
+          "status": "low"
+        },
+        {
+          "test_name": "Ferritin",
+          "value": 11,
+          "unit": "ng/mL",
+          "reference_text": "15 - 150",
+          "reference_range": {
+            "low": 15,
+            "high": 150,
+            "low_inclusive": true,
+            "high_inclusive": true
+          },
+          "status": "low"
+        },
+        {
+          "test_name": "White Blood Cell Count",
+          "value": 7.2,
+          "unit": "x10^3/uL",
+          "reference_text": "4.0 - 11.0",
+          "reference_range": {
+            "low": 4,
+            "high": 11,
+            "low_inclusive": true,
+            "high_inclusive": true
+          },
+          "status": "normal"
+        }
+      ],
+      "warnings": []
+    }
+  },
+  {
+    "sample_id": "cutoffs-and-missing-range",
+    "report": "SYNTHETIC EDUCATIONAL REPORT\nLab test | Result | Unit | Reference range\nTriglycerides | 150 | mg/dL | < 150\nAlbumin | 3.5 | g/dL | 3.5 - 5.0\nVitamin B12 | 310 | pg/mL | not supplied\nGlucose | 100 | mg/dL | <= 100",
+    "expected": {
+      "tests": [
+        {
+          "test_name": "Triglycerides",
+          "value": 150,
+          "unit": "mg/dL",
+          "reference_text": "< 150",
+          "reference_range": {
+            "low": null,
+            "high": 150,
+            "low_inclusive": true,
+            "high_inclusive": false
+          },
+          "status": "high"
+        },
+        {
+          "test_name": "Albumin",
+          "value": 3.5,
+          "unit": "g/dL",
+          "reference_text": "3.5 - 5.0",
+          "reference_range": {
+            "low": 3.5,
+            "high": 5,
+            "low_inclusive": true,
+            "high_inclusive": true
+          },
+          "status": "normal"
+        },
+        {
+          "test_name": "Vitamin B12",
+          "value": 310,
+          "unit": "pg/mL",
+          "reference_text": "not supplied",
+          "reference_range": null,
+          "status": "unknown"
+        },
+        {
+          "test_name": "Glucose",
+          "value": 100,
+          "unit": "mg/dL",
+          "reference_text": "<= 100",
+          "reference_range": {
+            "low": null,
+            "high": 100,
+            "low_inclusive": true,
+            "high_inclusive": true
+          },
+          "status": "normal"
+        }
+      ],
+      "warnings": []
+    }
+  }
+]

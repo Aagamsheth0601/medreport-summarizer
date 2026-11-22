@@ -55,6 +55,14 @@ class TestResult(Contract):
             raise ValueError("Status does not match the supplied reference range")
         return self
 
+    def is_at_excluded_cutoff(self) -> bool:
+        """A validated low or high result can equal its bound only when it is exclusive."""
+        bounds = self.reference_range
+        return bounds is not None and (
+            (self.status == "low" and self.value == bounds.low)
+            or (self.status == "high" and self.value == bounds.high)
+        )
+
 
 class Extraction(Contract):
     tests: list[TestResult] = Field(min_length=1, max_length=100)

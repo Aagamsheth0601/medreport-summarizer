@@ -74,6 +74,8 @@ flowchart TD
 
 The Interpreter describes the sample's evidence and relationships. It does not assign urgency, prescribe treatment, or recommend appointment timing. Those behaviors from the original CLI were removed for the portfolio scope.
 
+If a finding cites a value exactly equal to an excluded cutoff, Python writes the finding's title, rationale, and explanation from the validated measurements. For example, `150` is equal to the cutoff in `< 150` and outside that supplied range. The trace and the final report use the same wording for that finding.
+
 ## Built-in reports
 
 | Sample ID | Tests | Purpose |
@@ -156,6 +158,20 @@ Pytest clears the specified temporary directory; use it only for disposable test
 Offline tests use scripted model responses and require no API key. They test contracts, missing/altered evidence, invalid references, skipped findings, API/network failures, stage ordering, and file-saving behavior. They do **not** evaluate model reasoning or medical correctness. Live smoke testing is separate: run each sample with the CLI and inspect its saved result.
 
 See [VERIFICATION.md](VERIFICATION.md) for the milestone's actual test results and live-service limitations.
+
+## Benchmark one call against three agents
+
+With the local Gemini key configured, run the paired comparison from the repository root:
+
+```powershell
+.\.venv\Scripts\python.exe benchmark.py
+```
+
+The benchmark uses three fixed synthetic reports [with hand-written expected extractions](benchmark_cases.json). Each approach receives the same report text and uses the same model and validators. The single-call baseline combines the three existing prompt instructions in one response. A full benchmark uses up to twelve model calls. Use `--case cutoffs-and-missing-range` to repeat just that pair.
+
+The JSON in `outputs/` includes elapsed time, attempted calls, total provider-reported tokens, exact extraction verification, and the outputs or errors. The total is unavailable if a call returns without token usage. A failed attempt stays in the results and gives the command a nonzero exit code.
+
+For prose review, compare the saved explanations against the report and its supplied ranges. Count any omitted out-of-range result or missing-range limitation, value or range contradiction, and unsupported diagnosis or care recommendation. The schema checks verify structure and evidence links. This review checks what the text claims about these synthetic reports.
 
 ## Design decisions and limits
 

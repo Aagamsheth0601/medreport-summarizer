@@ -2,6 +2,7 @@
 
 import json
 from agents import PipelineError
+from agents.range_evidence import cutoff_finding_evidence
 from llm import ModelClient, generate_validated
 from schemas import Analysis, CommunicatorResponse, DISCLAIMER, Explanation, Extraction
 
@@ -27,7 +28,13 @@ def communicate(extraction: Extraction, analysis: Analysis, client: ModelClient)
     response = generate_validated(
         client, "Communicator", SYSTEM_PROMPT, contents, CommunicatorResponse
     )
+    return verify_explanations(extraction, analysis, response)
 
+
+def verify_explanations(
+    extraction: Extraction, analysis: Analysis, response: CommunicatorResponse
+) -> Explanation:
+    expected_ids = range(1, len(analysis.findings) + 1)
     explanations = {entry.finding_id: entry.text for entry in response.findings_explained}
     if (
         explanations.keys() != set(expected_ids)
@@ -36,6 +43,9 @@ def communicate(extraction: Extraction, analysis: Analysis, client: ModelClient)
         raise PipelineError(
             "Communicator", "The explanation must reference every finding ID exactly once."
         )
+
+    # Replace the whole cutoff explanation so contrary model wording cannot survive beside it.
+    explanations.update(cutoff_finding_evidence(extraction, analysis))
 
     # Keep the report format compatible with recorded runs and the frontend.
     return Explanation(

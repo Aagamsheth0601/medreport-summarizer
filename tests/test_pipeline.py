@@ -156,6 +156,40 @@ def test_explanations_are_saved_in_finding_order():
     assert result.summary_markdown.index(expected[0]) < result.summary_markdown.index(expected[1])
 
 
+def test_cutoff_finding_uses_validated_evidence_instead_of_wrong_wording():
+    responses = responses_for("range-boundaries")
+    responses[1]["findings"][0]["related_tests"].extend(["Fasting Blood Sugar", "Vitamin B12"])
+    responses[1]["findings"].append({
+        "finding": "A finding with no strict cutoff hit",
+        "related_tests": ["eGFR"],
+        "rationale": "This value equals an inclusive lower bound.",
+    })
+    wrong = "Total Cholesterol is above 200 mg/dL and HDL Cholesterol is below 40 mg/dL."
+    responses[1]["findings"][0]["finding"] = "Above and below the cutoffs"
+    responses[1]["findings"][0]["rationale"] = wrong
+    ordinary = "The eGFR meets its supplied minimum."
+    responses[2]["findings_explained"] = [
+        {"finding_id": 1, "text": wrong},
+        {"finding_id": 2, "text": ordinary},
+    ]
+
+    client = FakeClient(responses)
+    result = run_pipeline("range-boundaries", client)
+
+    boundary, other = result.explanation.findings_explained
+    assert "Total Cholesterol measured 200 mg/dL, exactly at the excluded cutoff (< 200)." in boundary
+    assert "HDL Cholesterol measured 40 mg/dL, exactly at the excluded cutoff (> 40)." in boundary
+    assert "Fasting Blood Sugar measured 100 mg/dL, within the supplied range (70 - 100)." in boundary
+    assert "Vitamin B12 measured 250 pg/mL, with no supplied reference range." in boundary
+    assert other == ordinary
+    assert result.analysis.findings[0].finding == "At an excluded cutoff"
+    assert result.analysis.findings[0].rationale == boundary
+    assert result.analysis.findings[1].rationale == responses[1]["findings"][1]["rationale"]
+    assert json.loads(client.calls[2][1])["analysis"]["findings"][0]["rationale"] == boundary
+    assert boundary in result.summary_markdown
+    assert wrong not in result.summary_markdown
+
+
 def test_abnormal_results_cannot_disappear_from_findings():
     responses = responses_for("mixed-patterns")
     responses[1]["findings"][0]["related_tests"].remove("Hemoglobin")

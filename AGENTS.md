@@ -18,6 +18,7 @@
   Create the `outputs/` parent directory first. The `pytest-temp` directory is disposable test data; pytest clears its contents.
 - Offline tests replace the network boundary, not the pipeline. They do not establish clinical accuracy.
 - Live smoke tests require a valid Gemini key and may consume quota. Use only the three built-in samples.
+- The separate benchmark CLI uses the fixed synthetic fixtures in `benchmark_cases.json`. Keep those reports out of prompt tuning.
 - Preserve local validation even when the provider supports only part of a JSON Schema.
 - Verify UI changes at ~390px, ~768px, and ~1280px with Playwright. Check Vite's Node requirements against the Node version pinned in `netlify.toml`.
 - Web preview: build `frontend/` with `npm ci` and `npm run build`, then run `python -m uvicorn api:app --host 127.0.0.1 --port 8000`.
@@ -93,6 +94,11 @@
 - Symptom: the first live boundary run stopped at the Interpreter during Gemini 3.5 Flash-Lite verification.
 - Root cause: the Gemini API returned HTTP 503. The CLI surfaced the error and saved no result.
 - Recovery: one manual retry completed all three stages.
+
+### Benchmark cutoff passed validation but the explanation misstated equality
+- Symptom: the three-agent output flagged a value of 150 outside the supplied range of `< 150`, then described it as above the cutoff.
+- Root cause: the range validator checks the structured value and status. The Communicator checks finding IDs while the numeric comparison in its prose remains free text.
+- Fix: render the finding title, rationale, and explanation from validated values when a cited result equals a strict cutoff. Cover both cutoff directions and any other measurements cited by the same finding.
 
 ## Remaining limits
 
