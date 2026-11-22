@@ -32,7 +32,7 @@ class GeminiClient:
         key = os.getenv("GEMINI_API_KEY", "").strip()
         if not key:
             raise PipelineError("Configuration", "Set GEMINI_API_KEY in your ignored .env file.")
-        self.model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash").strip()
+        self.model = os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite").strip()
         if not self.model:
             raise PipelineError("Configuration", "GEMINI_MODEL must not be blank.")
         self.client = genai.Client(

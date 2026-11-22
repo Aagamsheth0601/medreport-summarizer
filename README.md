@@ -102,7 +102,7 @@ Edit `.env` locally and supply your Gemini API key. Never commit it:
 
 ```dotenv
 GEMINI_API_KEY=your-key-here
-GEMINI_MODEL=gemini-2.5-flash
+GEMINI_MODEL=gemini-3.5-flash-lite
 ```
 
 The model is configurable because availability and quotas can change. An API key with access to the configured model is required. Live runs can consume quota or incur charges under your account settings.

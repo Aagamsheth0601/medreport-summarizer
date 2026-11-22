@@ -47,3 +47,15 @@ the final code against recorded outputs; it is not a new live model call.
 - Schema checks and fixture matching do not prove generated prose is correct.
 - No evaluation comparing three calls with a single-prompt baseline has been performed.
 - Live model responses, latency, availability, and quota can vary between runs.
+
+## Communicator coverage and Gemini migration
+
+On November 22, 2026, fresh runs with `gemini-3.5-flash-lite` passed all three pipeline stages and their validators:
+
+| Sample | Lab values | Findings | Explanations |
+| --- | ---: | ---: | ---: |
+| `within-range` | 4 | 0 | 0 |
+| `mixed-patterns` | 7 | 3 | 3 |
+| `range-boundaries` | 5 | 1 | 1 |
+
+The first boundary run stopped at the Interpreter with Gemini HTTP 503 and saved no result. One manual retry passed. These checks establish coverage and schema compatibility for the three synthetic runs. Generated prose accuracy requires a separate evaluation.

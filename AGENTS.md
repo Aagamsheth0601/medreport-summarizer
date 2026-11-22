@@ -89,6 +89,11 @@
 - Root cause: the Communicator checked the number of explanations without checking their links to findings.
 - Fix: assign finding IDs at the Communicator handoff and require exactly one explanation for each ID. Save the validated text in finding order for compatibility with recorded reports.
 
+### Boundary smoke test hit a Gemini service error
+- Symptom: the first live boundary run stopped at the Interpreter during Gemini 3.5 Flash-Lite verification.
+- Root cause: the Gemini API returned HTTP 503. The CLI surfaced the error and saved no result.
+- Recovery: one manual retry completed all three stages.
+
 ## Remaining limits
 
 - Final follow-up live verification received provider HTTP 503 twice. Earlier live runs for all three samples succeeded;
