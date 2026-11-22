@@ -88,3 +88,5 @@ This is a small first comparison. The results identify a testable prose-groundin
 An offline regression reproduced incorrect above/below wording for both strict cutoff directions. The fix also covers other tests cited by the same finding, including inclusive boundaries and missing ranges. All 76 offline tests passed.
 
 In a fresh 3.5 Flash-Lite run on `cutoffs-and-missing-range`, the three-agent trace and Markdown report both said: “Triglycerides measured 150 mg/dL, exactly at the excluded cutoff (< 150).” The single-call attempt again failed extraction validation at `extraction.tests.0`. The offline comparison exercised the shared wording fix through both modes with a valid extraction.
+
+The public “Right on the boundary” recording was refreshed from a new Gemini 3.5 Flash-Lite run. Both strict cutoff findings use the validated wording in the overview, trace, and Markdown. The production build on Node 20.11.1 included the refreshed recording.
