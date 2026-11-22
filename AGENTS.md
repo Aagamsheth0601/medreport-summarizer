@@ -98,7 +98,7 @@
 ### Benchmark cutoff passed validation but the explanation misstated equality
 - Symptom: the three-agent output flagged a value of 150 outside the supplied range of `< 150`, then described it as above the cutoff.
 - Root cause: the range validator checks the structured value and status. The Communicator checks finding IDs while the numeric comparison in its prose remains free text.
-- Current handling: log the prose issue separately from the structured pass. See `VERIFICATION.md` for the comparison.
+- Fix: render the finding title, rationale, and explanation from validated values when a cited result equals a strict cutoff. Cover both cutoff directions and any other measurements cited by the same finding.
 
 ## Remaining limits
 

@@ -16,7 +16,7 @@ from agents.communicator import SYSTEM_PROMPT as COMMUNICATOR_PROMPT
 from agents.communicator import render_summary, verify_explanations
 from agents.extractor import SYSTEM_PROMPT as EXTRACTOR_PROMPT
 from agents.interpreter import SYSTEM_PROMPT as INTERPRETER_PROMPT
-from agents.interpreter import verify_analysis
+from agents.interpreter import validate_analysis
 from llm import GeminiClient, ModelClient, generate_validated
 from main import save_result
 from pipeline import run_report
@@ -96,11 +96,11 @@ def run_single(case: BenchmarkCase, client: ModelClient,
     )
     verify_extraction(response.extraction, case.expected)
     progress("Extractor", "completed")
-    verify_analysis(response.extraction, response.analysis)
-    explanation = verify_explanations(response.analysis, response.explanation)
+    analysis = validate_analysis(response.extraction, response.analysis)
+    explanation = verify_explanations(response.extraction, analysis, response.explanation)
     return PipelineResult(
         sample_id=case.sample_id, model=client.model, extraction=response.extraction,
-        analysis=response.analysis, explanation=explanation,
+        analysis=analysis, explanation=explanation,
         summary_markdown=render_summary(explanation),
     )
 

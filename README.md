@@ -74,6 +74,8 @@ flowchart TD
 
 The Interpreter describes the sample's evidence and relationships. It does not assign urgency, prescribe treatment, or recommend appointment timing. Those behaviors from the original CLI were removed for the portfolio scope.
 
+If a finding cites a value exactly equal to an excluded cutoff, Python writes the finding's title, rationale, and explanation from the validated measurements. For example, `150` is equal to the cutoff in `< 150` and outside that supplied range. The trace and the final report use the same wording for that finding.
+
 ## Built-in reports
 
 | Sample ID | Tests | Purpose |
