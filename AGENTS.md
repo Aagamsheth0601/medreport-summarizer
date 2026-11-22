@@ -96,6 +96,7 @@
 
 ### Netlify portfolio mode and layout migration
 - Public React demo reads `frontend/public/demo.json`: validated saved real runs, no secrets or live calls. Do not describe playback as live inference.
+- Symptom: the README described live polling and reconnect as a browser workflow. Root cause: those instructions predated the recorded data loader. Fix: document React playback separately from fresh CLI and FastAPI runs.
 - Symptom: desktop analysis left empty space after moving samples to a horizontal row. Cause: inherited workspace max-width. Fix: expand analysis to full width and recheck three viewports.
 - Windows sandbox preview required elevated local socket access.
 
