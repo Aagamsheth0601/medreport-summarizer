@@ -12,7 +12,7 @@ The interesting part is the handoff between agents: each stage has a different r
 
 This is a **sequential multi-agent LLM pipeline**, not an autonomous agent system. It does not independently plan tasks, select tools, or establish medical accuracy.
 
-**Live demo:** [MedReport Decoder](https://medreport-decoder.netlify.app/) — a static recorded demo hosted on Netlify. The Python pipeline and FastAPI API remain available for local live runs.
+**Recorded web demo:** [MedReport Decoder](https://medreport-decoder.netlify.app/) — a static recorded demo hosted on Netlify. The Python pipeline and FastAPI API remain available for local live runs.
 
 ![MedReport web workspace](docs/screenshots/workspace.png)
 
