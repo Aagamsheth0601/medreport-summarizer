@@ -34,8 +34,11 @@ def responses_for(sample_id):
                        "rationale": "These sample values fall outside their supplied ranges."}] if abnormal else []),
         "limitations": ["Synthetic values cannot establish health."],
     }
+    findings_explained = (
+        [{"finding_id": 1, "text": "Sample values outside their ranges."}] if abnormal else []
+    )
     explanation = dict(quick_summary="This is a synthetic example.",
-                       findings_explained=["Sample values outside their ranges."] if abnormal else [],
+                       findings_explained=findings_explained,
                        within_range="See the supplied ranges.", limitations="AI can make mistakes.")
     return [expected.model_dump(), analysis, explanation]
 
@@ -103,6 +106,54 @@ def test_reject_missing_finding_explanation():
     responses[2]["findings_explained"] = []
     with pytest.raises(PipelineError, match="Communicator"):
         run_pipeline("mixed-patterns", FakeClient(responses))
+
+
+def responses_with_two_findings():
+    responses = responses_for("mixed-patterns")
+    responses[1]["findings"].append({
+        "finding": "An additional finding",
+        "related_tests": ["Hemoglobin"],
+        "rationale": "This finding needs its own explanation.",
+    })
+    responses[2]["findings_explained"].append({
+        "finding_id": 2,
+        "text": "An explanation for the additional finding.",
+    })
+    return responses
+
+
+def test_reject_repeated_untagged_explanation_with_matching_count():
+    responses = responses_with_two_findings()
+    responses[2]["findings_explained"] = ["Only the first finding is explained."] * 2
+
+    with pytest.raises(PipelineError, match="Communicator"):
+        run_pipeline("mixed-patterns", FakeClient(responses))
+
+
+@pytest.mark.parametrize("finding_ids", [(1, 1), (1, 3), (1, 2, 2)])
+def test_reject_incorrect_finding_id_coverage(finding_ids):
+    responses = responses_with_two_findings()
+    responses[2]["findings_explained"] = [
+        {"finding_id": finding_id, "text": f"Explanation {index}."}
+        for index, finding_id in enumerate(finding_ids, start=1)
+    ]
+
+    with pytest.raises(PipelineError, match="every finding ID exactly once"):
+        run_pipeline("mixed-patterns", FakeClient(responses))
+
+
+def test_explanations_are_saved_in_finding_order():
+    responses = responses_with_two_findings()
+    expected = [entry["text"] for entry in responses[2]["findings_explained"]]
+    responses[2]["findings_explained"].reverse()
+    client = FakeClient(responses)
+
+    result = run_pipeline("mixed-patterns", client)
+
+    numbered_findings = json.loads(client.calls[2][1])["analysis"]["findings"]
+    assert [finding["finding_id"] for finding in numbered_findings] == [1, 2]
+    assert result.explanation.findings_explained == expected
+    assert result.summary_markdown.index(expected[0]) < result.summary_markdown.index(expected[1])
 
 
 def test_abnormal_results_cannot_disappear_from_findings():
