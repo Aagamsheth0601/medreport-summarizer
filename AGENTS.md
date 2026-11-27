@@ -47,6 +47,7 @@
 - Root cause: missing explicit whitespace and an offscreen-only hiding technique.
 - Fix: preserve whitespace and clip the skip link until keyboard focus. Add a narrow-screen table-scroll hint.
 - Network failures preserve the job ID for reconnect; expired runs and busy-server responses show explicit errors.
+- The first notebook layout wrapped the last letter of Communicator onto a second line at 390 px. Stack the stage cards as compact rows on phones so every stage name stays readable.
 
 ### Model JSON can parse but still be invalid
 - Symptom: missing fields, wrong types, or duplicate tests could reach the next stage.

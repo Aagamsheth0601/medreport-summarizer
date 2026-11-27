@@ -37,3 +37,10 @@ Verified November 27, 2026, with Python 3.10 and Node 20.11.1.
 - The browser started `range-boundaries` with HTTP 202, polled the same run ID, and displayed all three completed stages, five measurements, and the Agent trace. The result reported Gemini 3.5 Flash-Lite.
 - An interrupted poll showed a recoverable error. Reconnect fetched the same run ID and sent no second start request.
 - A production build made with the development flag set still played the recordings through FastAPI's static mount and made zero API requests.
+
+## Interface redesign checkpoint
+
+- Checked the report workspace at 390, 768, and 1280 px. Agent names fit at every width and the phone scrolls the lab table within its own region.
+- Verified keyboard navigation from Overview through Agent trace and downloaded the all-stages JSON.
+- Used a controlled live response to check the running-stage pulse and result reveal. Both animations honor reduced motion.
+- The Node 20.11.1 production build and all 76 offline tests passed. Updated the README's desktop and mobile screenshots from that build.
