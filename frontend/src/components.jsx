@@ -3,21 +3,21 @@
 const AGENTS = [
   {
     name: "Extractor",
-    verb: "Read the evidence",
+    verb: "Read values and ranges",
     description:
       "Turns the report into validated values, units, and reference ranges.",
     icon: "scan",
   },
   {
     name: "Interpreter",
-    verb: "Connect the findings",
+    verb: "Link findings to tests",
     description:
       "Groups tests and links every out-of-range finding to its evidence.",
     icon: "nodes",
   },
   {
     name: "Communicator",
-    verb: "Make it understandable",
+    verb: "Explain the findings",
     description:
       "Writes a plain-language explanation while preserving the limitations.",
     icon: "text",
@@ -105,14 +105,12 @@ export function Disclaimer() {
         <Icon name="info" size={19} />
       </span>
       <div>
-        <strong>Portfolio demo · For informational purposes only</strong>
+        <strong>Synthetic reports for learning</strong>
         <p>
-          Built-in synthetic reports only. AI can make mistakes. This is not a
-          medical tool—do not use it for diagnosis, treatment, or care
-          decisions. Consult a qualified doctor about your own results.
+          AI can make mistakes. Use this demo for learning only. Ask a qualified
+          doctor about your own results and care decisions.
         </p>
       </div>
-      <span className="synthetic-stamp">NO REAL PATIENT DATA</span>
     </aside>
   );
 }
@@ -137,7 +135,7 @@ export function ErrorNotice({ children, action, actionLabel }) {
 export function AgentProgress({ run }) {
   return (
     <div className="agent-track" aria-label="Agent progress" aria-live="polite">
-      {AGENTS.map((agent, i) => {
+      {AGENTS.map((agent) => {
         const state = run?.stages?.[agent.name] || "waiting";
         const label = {
           waiting: "Waiting",
@@ -151,7 +149,6 @@ export function AgentProgress({ run }) {
               <span className="step-icon">
                 <Icon name={state === "completed" ? "check" : agent.icon} />
               </span>
-              <span className="step-number">0{i + 1}</span>
             </div>
             <strong>{agent.name}</strong>
             <span className="step-purpose">{agent.verb}</span>
@@ -176,8 +173,7 @@ export function SourceReport({ sample }) {
     <div className="report-sheet">
       <div className="report-heading">
         <div>
-          <span className="eyebrow">SOURCE DOCUMENT</span>
-          <h3>Synthetic blood report</h3>
+          <h3>Source report</h3>
         </div>
         <span className="document-icon">
           <Icon name="file" size={29} />
@@ -185,7 +181,7 @@ export function SourceReport({ sample }) {
       </div>
       <div className="report-meta">
         <span>
-          Sample <strong>{sample.id}</strong>
+          <strong>{sample.title}</strong>
         </span>
         <span>
           <strong>{sample.test_count}</strong> measurements
@@ -220,9 +216,6 @@ export function SourceReport({ sample }) {
           </tbody>
         </table>
       </div>
-      <p className="report-footnote">
-        Fictional values and illustrative ranges. No patient identifiers.
-      </p>
       <p id="source-scroll-hint" className="table-hint">Scroll the table sideways to see every column.</p>
     </div>
   );
@@ -238,8 +231,7 @@ export function Summary({ result }) {
   return (
     <div className="summary-content">
       <div className="result-intro">
-        <span className="eyebrow">THE PLAIN-LANGUAGE VIEW</span>
-        <h3>What this sample tells us</h3>
+        <h3>Summary</h3>
         <p>{explanation.quick_summary}</p>
       </div>
       <div className="result-counts" aria-label="Test status counts">
@@ -248,22 +240,19 @@ export function Summary({ result }) {
           .map(({ status, count }) => (
             <div key={status}>
               <span className={`count-value ${status}`}>
-                {count.toString().padStart(2, "0")}
+                {count}
               </span>
               <span>{STATUS_LABELS[status]}</span>
             </div>
           ))}
       </div>
       <div className="section-label">
-        <span>Patterns & explanations</span>
+        <span>Findings</span>
         <span>{explanation.findings_explained.length} findings</span>
       </div>
       {explanation.findings_explained.length ? (
         explanation.findings_explained.map((text, i) => (
           <article className="finding" key={i}>
-            <span className="finding-index">
-              {String(i + 1).padStart(2, "0")}
-            </span>
             <div>
               <h4>{result.analysis.findings[i].finding}</h4>
               <p>{text}</p>
@@ -277,7 +266,7 @@ export function Summary({ result }) {
         ))
       ) : (
         <p className="empty-findings">
-          No out-of-range pattern was identified in this synthetic sample.
+          This sample has no reported out-of-range findings.
         </p>
       )}
       <section className="within-box">
@@ -288,7 +277,7 @@ export function Summary({ result }) {
         </div>
       </section>
       <section className="limits-box">
-        <h4>What this explanation cannot tell you</h4>
+        <h4>Limitations</h4>
         <p>{explanation.limitations}</p>
       </section>
     </div>
@@ -299,12 +288,8 @@ export function LabValues({ result }) {
   return (
     <div className="values-content">
       <div className="section-intro">
-        <span className="eyebrow">THE EVIDENCE</span>
-        <h3>Every value, accounted for.</h3>
-        <p>
-          Extracted by the first agent and checked against the synthetic source.
-          “Within range” describes a value, not someone’s health.
-        </p>
+        <h3>Lab values</h3>
+        <p>These values and ranges were checked against the source report.</p>
       </div>
       <div
         className="table-scroll"
@@ -351,8 +336,7 @@ export function LabValues({ result }) {
         </div>
       )}
       <p className="small-note">
-        Strict boundaries are preserved: a result of 200 is outside a reference
-        range of &lt; 200. Missing ranges remain unknown.
+        A strict range excludes its cutoff. A missing range gives an unknown status.
       </p>
     </div>
   );
@@ -368,12 +352,8 @@ export function Trace({ result, sample }) {
   return (
     <div className="trace-content">
       <div className="section-intro">
-        <span className="eyebrow">UNDER THE HOOD</span>
-        <h3>Three agents. A visible handoff.</h3>
-        <p>
-          See how data moves between the agents and inspect the validated results
-          saved by the pipeline.
-        </p>
+        <h3>Agent trace</h3>
+        <p>Open a stage to see its input and saved output.</p>
       </div>
       {AGENTS.map((agent, i) => (
         <details className="trace-card" key={agent.name} open={i === 0}>
@@ -382,9 +362,7 @@ export function Trace({ result, sample }) {
               <Icon name={agent.icon} />
             </span>
             <span>
-              <strong>
-                0{i + 1} / {agent.name}
-              </strong>
+              <strong>{agent.name}</strong>
               <small>{agent.description}</small>
             </span>
             <span className="trace-check">
