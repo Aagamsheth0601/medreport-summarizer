@@ -27,3 +27,13 @@ Set-Location ..
 Visit http://127.0.0.1:8000, choose a sample, analyze, inspect all three views, and download the results.
 API tests use scripted responses, not clinical validation. Browser fault injection is verification only;
 the application has no hidden fake-analysis mode.
+
+## Local live sandbox checkpoint
+
+Verified November 27, 2026, with Python 3.10 and Node 20.11.1.
+
+- All 76 offline tests passed.
+- Playwright switched between Recorded demo and Live Gemini at 390, 768, and 1280 px. Recorded playback made zero API requests, and live mode loaded the three samples through FastAPI.
+- The browser started `range-boundaries` with HTTP 202, polled the same run ID, and displayed all three completed stages, five measurements, and the Agent trace. The result reported Gemini 3.5 Flash-Lite.
+- An interrupted poll showed a recoverable error. Reconnect fetched the same run ID and sent no second start request.
+- A production build made with the development flag set still played the recordings through FastAPI's static mount and made zero API requests.

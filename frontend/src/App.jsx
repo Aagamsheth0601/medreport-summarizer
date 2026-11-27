@@ -1,13 +1,15 @@
 import { useEffect, useRef, useState } from "react";
-import { request, downloadFile } from "./api.js";
+import { downloadFile, liveRunsEnabled, requestLive, requestRecorded } from "./api.js";
 import { TABS, Icon, Disclaimer, ErrorNotice, AgentProgress, SourceReport,
          Summary, LabValues, Trace } from "./components.jsx";
 
 // App owns sample selection, job state, and reconnectable polling.
 export default function App() {
+  const [mode, setMode] = useState("recorded");
   const [samples, setSamples] = useState([]);
   const [selectedId, setSelectedId] = useState("mixed-patterns");
   const [loadError, setLoadError] = useState("");
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [run, setRun] = useState(null);
@@ -16,30 +18,39 @@ export default function App() {
   const [pollRetry, setPollRetry] = useState(0);
   const [tab, setTab] = useState("Overview");
   const mounted = useRef(true);
+  const isLive = mode === "live";
+  const request = isLive ? requestLive : requestRecorded;
   const selected = samples.find((sample) => sample.id === selectedId);
   const result = run?.result;
   const busy = submitting || run?.status === "running";
-
-  async function loadSamples() {
-    setLoading(true);
-    setLoadError("");
-    try {
-      const data = await request("/api/samples");
-      if (mounted.current) setSamples(data);
-    } catch (error) {
-      if (mounted.current) setLoadError(error.message);
-    } finally {
-      if (mounted.current) setLoading(false);
-    }
-  }
+  const recordedRunLabel = result ? "View this demo again" : "Explore this report";
+  const liveProgressLabel = submitting ? "Starting live run…" : "Running live…";
 
   useEffect(() => {
     mounted.current = true;
-    loadSamples();
     return () => {
       mounted.current = false;
     };
   }, []);
+
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setLoadError("");
+    request("/api/samples")
+      .then((data) => {
+        if (active) setSamples(data);
+      })
+      .catch((error) => {
+        if (active) setLoadError(error.message);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [request, loadAttempt]);
 
   // Poll only after each response returns: requests never overlap. On disconnect,
   // preserve the run ID so reconnecting checks the same job instead of spending again.
@@ -73,7 +84,7 @@ export default function App() {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [run?.id, run?.status, pollRetry]);
+  }, [request, run?.id, run?.status, pollRetry]);
 
   function selectSample(id) {
     if (busy) return;
@@ -82,6 +93,15 @@ export default function App() {
     setRequestError("");
     setPollError("");
     setTab("Overview");
+  }
+
+  function changeMode(nextMode) {
+    if (busy || mode === nextMode) return;
+    selectSample(selectedId);
+    setSamples([]);
+    setLoadError("");
+    setLoading(true);
+    setMode(nextMode);
   }
 
   async function startRun() {
@@ -108,9 +128,9 @@ export default function App() {
       if (mounted.current)
         setRequestError(
           error.message +
-            (error.status
-              ? ""
-              : " If the request reached the server, wait before starting another run."),
+            (isLive && !error.status
+              ? " If the request reached the server, wait before starting another run."
+              : ""),
         );
     } finally {
       if (mounted.current) setSubmitting(false);
@@ -166,11 +186,34 @@ export default function App() {
               <h2>Pick a report. See it make sense.</h2>
             </div>
             <span className="workspace-caption">
-              <span className="live-dot" /> Recorded AI outputs · Synthetic reports
+              <span className="live-dot" /> {isLive ? "Live Gemini runs" : "Recorded AI outputs"} · Synthetic reports
             </span>
           </div>
+          {liveRunsEnabled && (
+            <fieldset className="report-mode" disabled={busy}>
+              <legend className="sr-only">Report mode</legend>
+              <label>
+                <input
+                  type="radio"
+                  name="report-mode"
+                  checked={!isLive}
+                  onChange={() => changeMode("recorded")}
+                />
+                Recorded demo
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="report-mode"
+                  checked={isLive}
+                  onChange={() => changeMode("live")}
+                />
+                Live Gemini
+              </label>
+            </fieldset>
+          )}
           {loadError ? (
-            <ErrorNotice action={loadSamples}>{loadError}</ErrorNotice>
+            <ErrorNotice action={() => setLoadAttempt((count) => count + 1)}>{loadError}</ErrorNotice>
           ) : loading ? (
             <div className="loading-state" role="status">
               Loading the sample library…
@@ -245,15 +288,11 @@ export default function App() {
                         {busy ? (
                           <>
                             <span className="spinner" />{" "}
-                            {submitting
-                              ? "Starting analysis…"
-                              : "Opening recorded demo…"}
+                            {isLive ? liveProgressLabel : "Opening recorded demo…"}
                           </>
                         ) : (
                           <>
-                            {result
-                              ? "View this demo again"
-                              : "Explore this report"}
+                            {isLive ? "Run live" : recordedRunLabel}
                             <Icon name="arrow" />
                           </>
                         )}
@@ -275,7 +314,9 @@ export default function App() {
                                 ? "Analysis in progress"
                                 : "Ready when you are"}
                       </span>
-                      <span>Saved from three real Gemini calls · No live AI requests</span>
+                      <span>
+                        {isLive ? "Live progress from three Gemini calls" : "Saved from three real Gemini calls · No live AI requests"}
+                      </span>
                     </div>
                   </section>
                   {requestError && <ErrorNotice>{requestError}</ErrorNotice>}
@@ -387,7 +428,9 @@ export default function App() {
                             <p>
                               {busy
                                 ? "Your sample is moving through the pipeline above. The completed explanation will appear here."
-                                : "Choose a report, then explore its saved explanation, lab values, and outputs from all three agents. These are recorded runs of the real Python pipeline."}
+                                : isLive
+                                  ? "Choose a built-in report and run it live to see each agent’s progress, the lab values, and the final explanation."
+                                  : "Choose a report, then explore its saved explanation, lab values, and outputs from all three agents. These are recorded runs of the real Python pipeline."}
                             </p>
                           </div>
                           <SourceReport sample={selected} />
@@ -402,7 +445,7 @@ export default function App() {
                     </div>
                     {result && (
                       <div className="result-footer">
-                        <span>Recorded output · {result.model}</span>
+                        <span>{isLive ? "Live output" : "Recorded output"} · {result.model}</span>
                         <button
                           className="text-button"
                           onClick={() =>

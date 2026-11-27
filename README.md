@@ -53,6 +53,20 @@ Use **one Uvicorn worker**. The server keeps at most 20 runs in memory. Finished
 
 FastAPI also serves the recorded web demo at `http://127.0.0.1:8000/` when `frontend/dist` exists. To create that folder, run `npm run build` from `frontend/`.
 
+### Try the local live sandbox in your browser
+
+Keep Uvicorn running on port 8000. In a second PowerShell window at the repository root:
+
+```powershell
+Set-Location frontend
+$env:VITE_ENABLE_LIVE_RUNS = "true"
+npm run dev
+```
+
+Open `http://127.0.0.1:5173`, select **Live Gemini**, choose a built-in sample, and click **Run live**. The page follows the existing FastAPI job through the three stages. If progress polling is interrupted, **Reconnect to this run** checks the same job.
+
+The opt-in mode is available in Vite development. Production builds play the recorded samples. The Gemini key is read by FastAPI from the repository's ignored `.env`.
+
 ## How it works
 
 ```mermaid

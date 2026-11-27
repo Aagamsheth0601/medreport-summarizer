@@ -385,6 +385,39 @@ h2 {
   gap: 6px;
   padding-bottom: 4px;
 }
+.report-mode {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+  margin: 0 0 18px;
+  padding: 0;
+  border: 0;
+}
+.report-mode label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 11px;
+  border: 1px solid #d8ddea;
+  border-radius: 7px;
+  background: #fff;
+  color: #17213d;
+  font-size: 13px;
+  cursor: pointer;
+}
+.report-mode label:has(input:checked) {
+  border-color: #293bdb;
+  background: #eef0ff;
+}
+.report-mode input {
+  margin: 0;
+  accent-color: #293bdb;
+}
+.report-mode:disabled label {
+  cursor: default;
+  opacity: 0.7;
+}
 .live-dot {
   width: 5px;
   height: 5px;
