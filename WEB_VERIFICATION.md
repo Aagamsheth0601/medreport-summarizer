@@ -44,3 +44,5 @@ Verified November 27, 2026, with Python 3.10 and Node 20.11.1.
 - Verified keyboard navigation from Overview through Agent trace and downloaded the all-stages JSON.
 - Used a controlled live response to check the running-stage pulse and result reveal. Both animations honor reduced motion.
 - The Node 20.11.1 production build and all 76 offline tests passed. Updated the README's desktop and mobile screenshots from that build.
+
+The motion follow-up was verified in Playwright at 390, 768, and 1280 px. The cutoff marker moves on load. Changing samples replays the source transition, and keyboard tab changes replay the result transition. With reduced motion, the cutoff and report render without animation.

@@ -48,6 +48,7 @@
 - Fix: preserve whitespace and clip the skip link until keyboard focus. Add a narrow-screen table-scroll hint.
 - Network failures preserve the job ID for reconnect; expired runs and busy-server responses show explicit errors.
 - The first notebook layout wrapped the last letter of Communicator onto a second line at 390 px. Stack the stage cards as compact rows on phones so every stage name stays readable.
+- Report motion originally played on the shared result panel only when it first got a result. Switching tabs reused that panel. Animate each view as it opens and replay the source animation when the sample changes.
 
 ### Model JSON can parse but still be invalid
 - Symptom: missing fields, wrong types, or duplicate tests could reach the next stage.

@@ -389,7 +389,6 @@ export default function App() {
                     </div>
                     <div
                       id="result-panel"
-                      className={result ? "result-ready" : undefined}
                       role="tabpanel"
                       aria-labelledby={`tab-${TABS.indexOf(tab)}`}
                       tabIndex="0"
@@ -405,7 +404,7 @@ export default function App() {
                                   : "Open the selected sample to see its saved explanation."}
                             </p>
                           </div>
-                          <SourceReport sample={selected} />
+                          <SourceReport key={selected.id} sample={selected} />
                         </div>
                       ) : tab === "Overview" ? (
                         <Summary result={result} />

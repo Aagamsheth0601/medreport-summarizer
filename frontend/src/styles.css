@@ -228,6 +228,7 @@ h1 em { display: inline-block; color: var(--pine); font-weight: inherit; }
   height: 100%;
   border-radius: 6px;
   background: #6c987f;
+  animation: draw-range 850ms 140ms cubic-bezier(0.22, 0.7, 0.28, 1) both;
 }
 
 .reference-track span::after {
@@ -454,7 +455,9 @@ fieldset:disabled label { cursor: default; opacity: 0.76; }
 .download-button:hover, .text-button:hover { text-decoration: underline; text-underline-offset: 3px; }
 
 #result-panel { padding: clamp(14px, 2.3vw, 25px); }
-.result-ready { animation: arrive 260ms ease-out both; }
+.report-sheet, .summary-content, .values-content, .trace-content {
+  animation: show-report 420ms cubic-bezier(0.22, 0.7, 0.28, 1) both;
+}
 .before-run .section-intro { margin-bottom: 12px; }
 .section-intro, .result-intro { margin-bottom: 16px; }
 .result-intro h3, .section-intro h3, .report-heading h3 { font-size: clamp(23px, 3vw, 30px); }
@@ -530,6 +533,14 @@ td:first-child { font-weight: 620; }
 
 @keyframes arrive {
   from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes draw-range {
+  from { width: 0; }
+  to { width: 72%; }
+}
+@keyframes show-report {
+  from { opacity: 0.35; transform: translateY(9px); }
   to { opacity: 1; transform: translateY(0); }
 }
 @keyframes working {
