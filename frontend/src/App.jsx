@@ -1,13 +1,15 @@
 import { useEffect, useRef, useState } from "react";
-import { request, downloadFile } from "./api.js";
+import { downloadFile, liveRunsEnabled, requestLive, requestRecorded } from "./api.js";
 import { TABS, Icon, Disclaimer, ErrorNotice, AgentProgress, SourceReport,
          Summary, LabValues, Trace } from "./components.jsx";
 
 // App owns sample selection, job state, and reconnectable polling.
 export default function App() {
+  const [mode, setMode] = useState("recorded");
   const [samples, setSamples] = useState([]);
   const [selectedId, setSelectedId] = useState("mixed-patterns");
   const [loadError, setLoadError] = useState("");
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [run, setRun] = useState(null);
@@ -16,30 +18,39 @@ export default function App() {
   const [pollRetry, setPollRetry] = useState(0);
   const [tab, setTab] = useState("Overview");
   const mounted = useRef(true);
+  const isLive = mode === "live";
+  const request = isLive ? requestLive : requestRecorded;
   const selected = samples.find((sample) => sample.id === selectedId);
   const result = run?.result;
   const busy = submitting || run?.status === "running";
-
-  async function loadSamples() {
-    setLoading(true);
-    setLoadError("");
-    try {
-      const data = await request("/api/samples");
-      if (mounted.current) setSamples(data);
-    } catch (error) {
-      if (mounted.current) setLoadError(error.message);
-    } finally {
-      if (mounted.current) setLoading(false);
-    }
-  }
+  const recordedRunLabel = result ? "Reopen report" : "Explore this report";
+  const liveProgressLabel = submitting ? "Starting live run…" : "Running live…";
 
   useEffect(() => {
     mounted.current = true;
-    loadSamples();
     return () => {
       mounted.current = false;
     };
   }, []);
+
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setLoadError("");
+    request("/api/samples")
+      .then((data) => {
+        if (active) setSamples(data);
+      })
+      .catch((error) => {
+        if (active) setLoadError(error.message);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [request, loadAttempt]);
 
   // Poll only after each response returns: requests never overlap. On disconnect,
   // preserve the run ID so reconnecting checks the same job instead of spending again.
@@ -73,7 +84,7 @@ export default function App() {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [run?.id, run?.status, pollRetry]);
+  }, [request, run?.id, run?.status, pollRetry]);
 
   function selectSample(id) {
     if (busy) return;
@@ -82,6 +93,15 @@ export default function App() {
     setRequestError("");
     setPollError("");
     setTab("Overview");
+  }
+
+  function changeMode(nextMode) {
+    if (busy || mode === nextMode) return;
+    selectSample(selectedId);
+    setSamples([]);
+    setLoadError("");
+    setLoading(true);
+    setMode(nextMode);
   }
 
   async function startRun() {
@@ -108,9 +128,9 @@ export default function App() {
       if (mounted.current)
         setRequestError(
           error.message +
-            (error.status
-              ? ""
-              : " If the request reached the server, wait before starting another run."),
+            (isLive && !error.status
+              ? " If the request reached the server, wait before starting another run."
+              : ""),
         );
     } finally {
       if (mounted.current) setSubmitting(false);
@@ -127,50 +147,76 @@ export default function App() {
           <span className="brand-mark">
             <Icon name="pulse" size={24} />
           </span>
-          <span>
-            medreport<span className="brand-dot">.</span>
-          </span>
-          <span className="brand-divider" />
-          <span className="brand-caption">REPORT DECODER</span>
+          <span>MedReport</span>
         </a>
-        <a
-          className="repo-link"
-          href="https://github.com/Aagamsheth0601/medreport-summarizer"
-          target="_blank"
-          rel="noreferrer"
-        >
-          View the code <Icon name="external" size={15} />
-        </a>
+        <nav aria-label="Main navigation">
+          <a href="#workspace">Reports</a>
+          <a href="#architecture">How it works</a>
+          <a
+            className="repo-link"
+            href="https://github.com/Aagamsheth0601/medreport-summarizer"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Source <Icon name="external" size={14} />
+          </a>
+        </nav>
       </header>
       <main>
         <section className="hero">
           <div className="hero-copy">
-            <div className="eyebrow"><span className="tiny-square" /> BLOOD REPORTS, DECODED.</div>
-            <h1>Less jargon.<br/><em>More clarity.</em></h1>
-            <p>What happens between a blood report and an explanation you can actually understand? Meet the three AI agents doing the work.</p>
-            <a className="hero-cta" href="#workspace">Explore a sample report <Icon name="arrow" /></a>
+            <h1>Read a <em>lab report.</em></h1>
+            <p>Pick a sample, check the numbers against their ranges, and see where each explanation came from.</p>
+            <a className="hero-cta" href="#workspace">
+              Open the reports <Icon name="arrow" size={17} />
+            </a>
           </div>
-          <div className="decoder-visual" aria-label="Three agents turn source values into a readable explanation">
-            <div className="visual-label"><span>INSIDE THE SYSTEM</span><span>01 — 03</span></div>
-            <div className="specimen"><span>SYNTHETIC BLOOD REPORT</span><strong>Hb <b>11.2</b> <small>g/dL</small></strong><div className="specimen-line"/><span>Values. Units. Reference ranges.</span></div>
-            <div className="decoder-flow"><span>01 / READ</span><span>02 / CONNECT</span><span>03 / EXPLAIN</span></div>
-            <div className="decoded-note"><Icon name="text" size={26}/><div><strong>The numbers become a story.</strong><p>With the original evidence one click away.</p></div></div>
-            <span className="visual-footnote">ILLUSTRATIVE PROCESS • NO REAL PATIENT DATA</span>
-          </div>
+          <figure className="reference-example">
+            <figcaption><Icon name="file" size={17} /> From the boundary sample</figcaption>
+            <div className="reference-reading">
+              <div>
+                <strong>Total cholesterol</strong>
+                <div>200 <small>mg/dL</small></div>
+              </div>
+              <span className="reference-limit">Range &lt; 200</span>
+            </div>
+            <div className="reference-track" aria-hidden="true"><span /></div>
+            <p>200 sits exactly at the cutoff. This range excludes it.</p>
+          </figure>
         </section>
         <Disclaimer />
         <section className="workspace" id="workspace" tabIndex="-1">
           <div className="workspace-heading">
-            <div>
-              <span className="eyebrow">THE INTERACTIVE DEMO</span>
-              <h2>Pick a report. See it make sense.</h2>
-            </div>
-            <span className="workspace-caption">
-              <span className="live-dot" /> Recorded AI outputs · Synthetic reports
-            </span>
+            <h2>Report workspace</h2>
+            {!liveRunsEnabled && (
+              <span className="workspace-caption"><span className="mode-dot" /> Recorded demo</span>
+            )}
           </div>
+          {liveRunsEnabled && (
+            <fieldset className="report-mode" disabled={busy}>
+              <legend className="sr-only">Report mode</legend>
+              <label>
+                <input
+                  type="radio"
+                  name="report-mode"
+                  checked={!isLive}
+                  onChange={() => changeMode("recorded")}
+                />
+                Recorded demo
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="report-mode"
+                  checked={isLive}
+                  onChange={() => changeMode("live")}
+                />
+                Live Gemini
+              </label>
+            </fieldset>
+          )}
           {loadError ? (
-            <ErrorNotice action={loadSamples}>{loadError}</ErrorNotice>
+            <ErrorNotice action={() => setLoadAttempt((count) => count + 1)}>{loadError}</ErrorNotice>
           ) : loading ? (
             <div className="loading-state" role="status">
               Loading the sample library…
@@ -180,15 +226,13 @@ export default function App() {
               <div className="workspace-grid">
                 <aside className="sample-sidebar">
                   <div className="sidebar-heading">
-                    <span className="small-number">01</span>
-                    <h3>Choose a sample</h3>
-                    <span>3 reports</span>
+                    <h3>Samples</h3>
                   </div>
                   <fieldset className="sample-options" disabled={busy}>
                     <legend className="sr-only">
                       Built-in synthetic reports
                     </legend>
-                    {samples.map((sample, i) => (
+                    {samples.map((sample) => (
                       <label
                         className={`sample-card ${sample.id === selectedId ? "selected" : ""}`}
                         key={sample.id}
@@ -200,18 +244,14 @@ export default function App() {
                           checked={sample.id === selectedId}
                           onChange={() => selectSample(sample.id)}
                         />
-                        <div className="sample-card-top">
-                          <span className="sample-number">REPORT 0{i + 1}</span>
-                          <span className="selection-dot" />
-                        </div>
-                        <strong>{sample.title}</strong>
+                        <span className="sample-card-title">
+                          <strong>{sample.title}</strong>
+                          <span className="selection-dot" aria-hidden="true" />
+                        </span>
                         <span className="sample-subtitle">
                           {sample.subtitle}
                         </span>
-                        <span className="sample-card-bottom">
-                          <span>{sample.test_count} measurements</span>
-                          <Icon name="arrow" size={17} />
-                        </span>
+                        <span className="sample-measurements">{sample.test_count} measurements</span>
                       </label>
                     ))}
                   </fieldset>
@@ -219,24 +259,11 @@ export default function App() {
                     <Icon name="info" size={17} />
                     <p>{selected.description}</p>
                   </div>
-                  <div className="engineering-note">
-                    <span className="eyebrow">DESIGNED WITH INTENTION</span>
-                    <p>
-                      Each agent has one job. Every handoff is checked. Every
-                      result can be inspected.
-                    </p>
-                    <a href="#architecture">
-                      Explore the architecture <Icon name="arrow" size={15} />
-                    </a>
-                  </div>
                 </aside>
                 <div className="analysis-workspace">
                   <section className="pipeline-card">
                     <div className="card-heading">
-                      <div>
-                        <span className="small-number">02</span>
-                        <h3>Follow the agents</h3>
-                      </div>
+                      <h3>Run progress</h3>
                       <button
                         className="run-button"
                         onClick={startRun}
@@ -245,15 +272,11 @@ export default function App() {
                         {busy ? (
                           <>
                             <span className="spinner" />{" "}
-                            {submitting
-                              ? "Starting analysis…"
-                              : "Opening recorded demo…"}
+                            {isLive ? liveProgressLabel : "Opening recorded demo…"}
                           </>
                         ) : (
                           <>
-                            {result
-                              ? "View this demo again"
-                              : "Explore this report"}
+                            {isLive ? "Run live" : recordedRunLabel}
                             <Icon name="arrow" />
                           </>
                         )}
@@ -273,9 +296,8 @@ export default function App() {
                               ? "Analysis stopped"
                               : run?.status === "running"
                                 ? "Analysis in progress"
-                                : "Ready when you are"}
+                                : "Ready"}
                       </span>
-                      <span>Saved from three real Gemini calls · No live AI requests</span>
                     </div>
                   </section>
                   {requestError && <ErrorNotice>{requestError}</ErrorNotice>}
@@ -374,23 +396,15 @@ export default function App() {
                       {!result ? (
                         <div className="before-run">
                           <div className="section-intro">
-                            <span className="eyebrow">
-                              {busy
-                                ? "ANALYSIS UNDERWAY"
-                                : "BEFORE THE AGENTS BEGIN"}
-                            </span>
-                            <h3>
-                              {busy
-                                ? "The evidence comes first."
-                                : "Start with the source."}
-                            </h3>
                             <p>
                               {busy
-                                ? "Your sample is moving through the pipeline above. The completed explanation will appear here."
-                                : "Choose a report, then explore its saved explanation, lab values, and outputs from all three agents. These are recorded runs of the real Python pipeline."}
+                                ? "The result will appear here when the run finishes."
+                                : isLive
+                                  ? "Run the selected sample to see a fresh explanation."
+                                  : "Open the selected sample to see its saved explanation."}
                             </p>
                           </div>
-                          <SourceReport sample={selected} />
+                          <SourceReport key={selected.id} sample={selected} />
                         </div>
                       ) : tab === "Overview" ? (
                         <Summary result={result} />
@@ -402,7 +416,7 @@ export default function App() {
                     </div>
                     {result && (
                       <div className="result-footer">
-                        <span>Recorded output · {result.model}</span>
+                        <span>{isLive ? "Live output" : "Recorded output"} · {result.model}</span>
                         <button
                           className="text-button"
                           onClick={() =>
@@ -424,52 +438,31 @@ export default function App() {
           )}
         </section>
         <section className="architecture" id="architecture">
-          <div className="architecture-title">
-            <span className="eyebrow">BEYOND A SINGLE PROMPT</span>
-            <h2>
-              A small system.
-              <br />
-              {" "}
-              <em>Deliberate boundaries.</em>
-            </h2>
-            <p>
-              Built to make the engineering visible, from the original evidence
-              to the final explanation.
-            </p>
-          </div>
+          <h2>How it works</h2>
           <div className="architecture-features">
             <article>
-              <span>01 / SPECIALIZATION</span>
-              <h3>One responsibility per agent.</h3>
-              <p>
-                Three separate LLM calls keep extraction, interpretation, and
-                communication inspectable.
-              </p>
+              <Icon name="scan" />
+              <h3>Read the report</h3>
+              <p>The Extractor reads the names, values, units, and ranges printed in the report.</p>
             </article>
             <article>
-              <span>02 / VALIDATION</span>
-              <h3>Trust is checked at the handoff.</h3>
-              <p>
-                Typed schemas, exact source-value checks, and linked findings
-                catch missing or altered evidence.
-              </p>
+              <Icon name="nodes" />
+              <h3>Check the findings</h3>
+              <p>Python checks the values against the source. The Interpreter links each finding to the relevant tests.</p>
             </article>
             <article>
-              <span>03 / HONEST LIMITS</span>
-              <h3>Failures stay visible.</h3>
-              <p>
-                Invalid outputs stop the run. Synthetic data and explicit
-                limitations keep this an educational demo.
-              </p>
+              <Icon name="text" />
+              <h3>Explain the results</h3>
+              <p>The Communicator writes an explanation for each finding. A failed check stops the run.</p>
             </article>
           </div>
         </section>
       </main>
       <footer className="site-footer">
         <span className="footer-brand">
-          <Icon name="pulse" size={18} /> medreport.
+          <Icon name="pulse" size={18} /> MedReport
         </span>
-        <span>Built by Aagam Sheth · An exploration in multi-agent AI</span>
+        <span>Built by Aagam Sheth</span>
         <a
           href="https://github.com/Aagamsheth0601/medreport-summarizer"
           target="_blank"
